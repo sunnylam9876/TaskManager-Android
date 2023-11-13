@@ -15,11 +15,11 @@
         <activity
             android:name=".Signup"
             android:exported="false" />
+        <!--<activity
+            android:name=".DashBoard"
+            android:exported="false" />-->
         <activity
             android:name=".DashBoard"
-            android:exported="false" />
-        <activity
-            android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

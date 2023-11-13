@@ -28,25 +28,47 @@ import java.util.Date;
 
 public class DashBoard extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener {
 
-    private TextView tvMonthYear;
+    //------------------------------------------------------------------
+    // for calendar recycler view
+    private TextView tvMonthYear, tvFwd, tvBwd;     // TextView for choosing the month of calendar
     private RecyclerView rvCalendar;
     private RecyclerView.LayoutManager layoutManager;
     private RecyclerView.Adapter calendarAdapter;
-
     private ArrayList<String> daysInMonth;
     private LocalDate selectedDate;
-
     private DateClass dateClass;      //custom date class
+    //------------------------------------------------------------------
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
 
+        //------------------------------------------------------------------
+        //set calendar
         rvCalendar = findViewById(R.id.rvCalendar);
         tvMonthYear = findViewById(R.id.tvMonthYear);
         selectedDate = LocalDate.now();
         setMonthView();
+
+        tvFwd = findViewById(R.id.tvFwd);
+        tvBwd = findViewById(R.id.tvBwd);
+        tvFwd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nextMonthAction(v);
+            }
+        });
+
+        tvBwd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                previousMonthAction(v);
+            }
+        });
+        //------------------------------------------------------------------
+
+
     }
 
     // set the recycler view to display the calendar
@@ -66,7 +88,7 @@ public class DashBoard extends AppCompatActivity implements MyCalendarAdapter.On
         ((MyCalendarAdapter) calendarAdapter).setOnItemClickListener(this);
     }
 
-    // get the days in a month can convert it to an array
+    // get the days in a month and convert them to an array
     private ArrayList<String> daysInMonthArray(LocalDate date) {
         ArrayList<String> daysInMonthArray = new ArrayList<>();
         YearMonth yearMonth = YearMonth.from(date);

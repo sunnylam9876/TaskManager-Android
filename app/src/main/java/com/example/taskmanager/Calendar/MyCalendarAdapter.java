@@ -1,4 +1,4 @@
-package com.example.taskmanager.calendar;
+package com.example.taskmanager.Calendar;
 
 import static com.example.taskmanager.Utility.CalculateDate.dayFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
@@ -15,7 +15,6 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.taskmanager.Class.DateClass;
 import com.example.taskmanager.R;
 
 import java.time.LocalDate;
@@ -57,7 +56,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.calendar_cell, parent,false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.recycler_calendar_cell, parent,false);
         MyViewHolder viewHolder = new MyViewHolder(v);
         return viewHolder;
     }
@@ -74,6 +73,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
         int today_year = yearFromDate(today);
         int today_month = monthFromDate(today);
         int today_day = dayFromDate(today);
+        //highlight Today
         if (holder.cellDayText.getText().toString().equals(Integer.toString(today_day)) &&
                 dateClass.getYear() == today_year && dateClass.getMonth() == today_month) {
             int color = ContextCompat.getColor(holder.itemView.getContext(), R.color.lightblue);
@@ -81,11 +81,11 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
         }
 
         // to be amended to not get the value of a TextView to increase efficiency
+        //int holderDay = Integer.parseInt(holder.cellDayText.getText().toString());
         if (Integer.parseInt(holder.cellTask.getText().toString()) > 0) {
             Drawable drawable = ContextCompat.getDrawable(holder.cellTask.getContext(), R.drawable.task_cell_background);
             holder.cellTask.setBackground(drawable);
-/*            int color = ContextCompat.getColor(holder.itemView.getContext(), R.color.pink);
-            holder.cellTask.setBackgroundColor(color);*/
+
         }
     }
 

@@ -1,11 +1,15 @@
 package com.example.taskmanager.TaskList;
 
 public class TaskClass {
-    private String taskTitle;
+    private String taskTitle, teamMember, teamManager;
     private int dueYear, dueMonth, dueDay;
 
-    public TaskClass(String taskTitle, int dueYear, int dueMonth, int dueDay) {
+    //private String status;
+
+    public TaskClass(String taskTitle, String teamManager, String teamMember, int dueYear, int dueMonth, int dueDay) {
         this.taskTitle = taskTitle;
+        this.teamMember = teamMember;
+        this.teamManager = teamManager;
         this.dueYear = dueYear;
         this.dueMonth = dueMonth;
         this.dueDay = dueDay;
@@ -17,6 +21,22 @@ public class TaskClass {
 
     public void setTaskTitle(String taskTitle) {
         this.taskTitle = taskTitle;
+    }
+
+    public String getTeamMember() {
+        return teamMember;
+    }
+
+    public void setTeamMember(String teamMember) {
+        this.teamMember = teamMember;
+    }
+
+    public String getTeamManager() {
+        return teamManager;
+    }
+
+    public void setTeamManager(String teamManager) {
+        this.teamManager = teamManager;
     }
 
     public int getDueYear() {

@@ -29,7 +29,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     //2 define view holder
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public CheckedTextView checkedTextView;
-        public TextView tvTaskListDue;
+        public TextView tvTaskListDue, tvTaskBy;
 
         // constructor
         public MyViewHolder(@NonNull View itemView) {
@@ -37,6 +37,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
             checkedTextView = itemView.findViewById(R.id.checkedTextView);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
+            tvTaskBy = itemView.findViewById(R.id.tvTaskListBy);
 
             // add OnClickListener:
 
@@ -58,6 +59,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         TaskClass eachTask = taskList.get(position);
         holder.checkedTextView.setText(eachTask.getTaskTitle());
         holder.tvTaskListDue.setText(eachTask.getDueYear() + " " + eachTask.getDueMonth() + eachTask.getDueDay());
+        holder.tvTaskBy.setText(eachTask.getTeamMember());
     }
 
     @Override

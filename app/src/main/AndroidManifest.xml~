@@ -18,7 +18,11 @@
         <activity
             android:name=".SignupActivity"
             android:exported="false" />
-
+        <!--
+<activity
+            android:name=".DashBoard"
+            android:exported="false" />
+        -->
         <activity
             android:name=".DashBoardActivity"
             android:exported="true" >

@@ -5,7 +5,7 @@
     android:id="@+id/tvSignupMsg"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Signup">
+    tools:context=".SignupActivity">
 
     <ImageView
         android:id="@+id/imageView3"

@@ -6,7 +6,6 @@ import static com.example.taskmanager.Utility.CalculateDate.monthYearFromDate;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -24,7 +23,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 
-public class DashBoard extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener {
+public class DashBoardActivity extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener {
 
     //------------------------------------------------------------------
     // for calendar recycler view
@@ -87,10 +86,16 @@ public class DashBoard extends AppCompatActivity implements MyCalendarAdapter.On
     private void setTaskList() {
         // define data sources
         ArrayList<TaskClass> taskList = new ArrayList<>();
-        TaskClass taskClass = new TaskClass("Task 1", 2023, 11, 13);
+        TaskClass taskClass = new TaskClass("Task 1", "manager1", "member1", 2023, 11, 13);
+        TaskClass taskClass1 = new TaskClass("Task 2", "manager2", "member2", 2023, 11, 14);
+        TaskClass taskClass2 = new TaskClass("Task 3", "manager3", "member3", 2023, 11, 15);
+        TaskClass taskClass3 = new TaskClass("Task 4", "manager4", "member4", 2023, 11, 16);
         taskList.add(taskClass);
+        taskList.add(taskClass1);
+        taskList.add(taskClass2);
+        taskList.add(taskClass3);
 
-        taskListAdapter = new MyTaskListAdapter(taskList, DashBoard.this);
+        taskListAdapter = new MyTaskListAdapter(taskList, DashBoardActivity.this);
         taskListLayoutManager = new LinearLayoutManager(this);
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);
@@ -107,7 +112,7 @@ public class DashBoard extends AppCompatActivity implements MyCalendarAdapter.On
         tvMonthYear.setText(monthYearFromDate(selectedDate));
 
         // feed the data to recycler view
-        calendarAdapter = new MyCalendarAdapter(dateClass, DashBoard.this);
+        calendarAdapter = new MyCalendarAdapter(dateClass, DashBoardActivity.this);
         calendarLayoutManager = new GridLayoutManager(getApplicationContext(), 7);
         rvCalendar.setLayoutManager(calendarLayoutManager);
         rvCalendar.setAdapter(calendarAdapter);

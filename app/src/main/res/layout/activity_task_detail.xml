@@ -68,7 +68,7 @@
                     android:background="@android:color/transparent"
                     android:drawableStart="@drawable/baseline_group_24"
                     android:drawablePadding="10dp"
-                    android:hint="Team Member"
+                    android:hint="Patient"
                     android:inputType="none"
                     android:padding="16dp"
                     android:text=""
@@ -78,24 +78,84 @@
                     />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <EditText
-                android:id="@+id/etTaskTitle3"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="55sp"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
-                android:background="@drawable/background_edittext"
-                android:drawableStart="@drawable/baseline_calendar_month_24"
-                android:drawablePadding="10dp"
-                android:ems="10"
-                android:hint="Target Date"
-                android:inputType="text"
-                android:padding="16dp"
-                android:text=""
-                android:textColor="@color/black"
-                android:textColorHint="@color/dark_grey" />
+                android:layout_height="match_parent"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/etTaskTitle3"
+                    android:layout_width="match_parent"
+                    android:layout_height="55sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_edittext"
+                    android:drawableStart="@drawable/baseline_calendar_month_24"
+                    android:drawablePadding="10dp"
+                    android:ems="10"
+                    android:hint="Date"
+                    android:inputType="text"
+                    android:padding="16dp"
+                    android:text=""
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/dark_grey" />
+
+                <Button
+                    android:id="@+id/button4"
+                    style="@style/Widget.AppCompat.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="2"
+                    android:text="Select Date"
+                    android:textSize="16sp" />
+
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <EditText
+                    android:id="@+id/etTaskTitle2"
+                    android:layout_width="match_parent"
+                    android:layout_height="55sp"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="16dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/background_edittext"
+                    android:drawableStart="@drawable/baseline_av_timer_24"
+                    android:drawablePadding="10dp"
+                    android:ems="10"
+                    android:hint="Time"
+                    android:inputType="text"
+                    android:padding="16dp"
+                    android:text=""
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/dark_grey" />
+
+                <Button
+                    android:id="@+id/button3"
+                    style="@style/Widget.AppCompat.Button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:layout_weight="2"
+                    android:text="Select Time"
+                    android:textSize="16sp" />
+            </LinearLayout>
 
             <EditText
                 android:id="@+id/editTextTextMultiLine"

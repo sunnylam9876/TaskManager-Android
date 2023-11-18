@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -31,7 +33,11 @@ public class SignupActivity extends AppCompatActivity {
 
     private EditText etSignupName, etSignupEmail, etSignupPassword;
     private Button btnSignup;
-    private TextView tvLoginMsg;
+    private TextView tvSignupMsg;
+
+    String[] roles = {"Patient", "Doctor"};
+    AutoCompleteTextView tvSignupRole;
+    ArrayAdapter<String> roleAdapter;
 
     // for Firebase Authentication
     private FirebaseAuth auth;
@@ -51,7 +57,13 @@ public class SignupActivity extends AppCompatActivity {
         etSignupEmail = findViewById(R.id.etSignupEmail);
         etSignupPassword = findViewById(R.id.etSignupPassword);
         btnSignup = findViewById(R.id.btnSignup);
-        tvLoginMsg = findViewById(R.id.tvLoginMsg);
+        tvSignupMsg = findViewById(R.id.tvSignupMsg);
+
+        // assign items to Role field
+        tvSignupRole = findViewById(R.id.tvSignupRole);
+        roleAdapter = new ArrayAdapter<String>(this, R.layout.background_memberlist, roles);
+        tvSignupRole.setAdapter(roleAdapter);
+        //tvSignupRole.setText("Patient");
 
         auth = FirebaseAuth.getInstance();
 
@@ -60,9 +72,17 @@ public class SignupActivity extends AppCompatActivity {
         btnSignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                String userName = etSignupName.getText().toString().trim();
                 String userEmail = etSignupEmail.getText().toString().trim();
                 String pass = etSignupPassword.getText().toString().trim();
-                String userName = etSignupName.getText().toString().trim();
+                String userRole = tvSignupRole.getText().toString();
+
+                //clear previous error msg
+                tvSignupMsg.setText("");
+
+                if (userName.isEmpty()) {
+                    etSignupName.setError("Role cannot be empty");
+                }
 
                 if (userEmail.isEmpty()) {
                     etSignupEmail.setError("Email cannot be empty");
@@ -70,7 +90,13 @@ public class SignupActivity extends AppCompatActivity {
 
                 if (pass.isEmpty()) {
                     etSignupPassword.setError("Password cannot be empty");
-                } else {
+                }
+
+                if (userRole.isEmpty()) {
+                    tvSignupRole.setError("Role cannot be empty");
+                }
+
+                if (!userName.isEmpty() && !userEmail.isEmpty() && !pass.isEmpty() && !userRole.isEmpty()) {
                     // create an user account
                     auth.createUserWithEmailAndPassword(userEmail, pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                         @Override
@@ -85,6 +111,7 @@ public class SignupActivity extends AppCompatActivity {
                                 userObj.put("userId", currentUserId);
                                 userObj.put("userName", userName);
                                 userObj.put("userEmail", userEmail);
+                                userObj.put("userRole", userRole);
 
                                 // adding users to Firestore
                                 collectionReference.add(userObj)
@@ -116,11 +143,14 @@ public class SignupActivity extends AppCompatActivity {
                                 //startActivity(new Intent(SignupActivity.this, LoginActivity.class));
                             } else {
                                 // otherwise, display error msg
-                                Toast.makeText(SignupActivity.this, "SignUp Failed" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                //Toast.makeText(SignupActivity.this, "SignUp Failed" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                tvSignupMsg.setText("SignUp Failed: " + task.getException().getMessage());
                             }
                         }
                     });
                 }
+
+
 
             }
         });

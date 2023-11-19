@@ -50,6 +50,12 @@ public class DashBoardActivity extends AppCompatActivity implements MyCalendarAd
         setContentView(R.layout.activity_dashboard);
 
         //------------------------------------------------------------------
+        //Load user name and uer id
+
+
+
+
+        //------------------------------------------------------------------
         //set calendar
         rvCalendar = findViewById(R.id.rvCalendar);
         tvMonthYear = findViewById(R.id.tvMonthYear);

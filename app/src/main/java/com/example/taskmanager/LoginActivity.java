@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -27,6 +28,7 @@ public class LoginActivity extends AppCompatActivity {
 
     // for Firebase Login / Signup authentication
     private FirebaseAuth auth;
+    private FirebaseUser currentUser;
 
 
     @Override
@@ -41,6 +43,13 @@ public class LoginActivity extends AppCompatActivity {
         btnLogin = findViewById(R.id.btnLogin);
         tvSignup = findViewById(R.id.tvSignup);
         tvLoginMsg = findViewById(R.id.tvLoginMsg);
+
+        currentUser = auth.getCurrentUser();
+        if (currentUser != null) {
+            // user is already logged in
+            final String currentUserId = currentUser.getUid();
+            startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
+        }
 
         // set login button onClick listener
         btnLogin.setOnClickListener(new View.OnClickListener() {

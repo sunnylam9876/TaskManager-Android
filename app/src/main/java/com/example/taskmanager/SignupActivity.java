@@ -137,14 +137,9 @@ public class SignupActivity extends AppCompatActivity {
                                             }
                                         });
 
-
-                                // display successful msg and redirect user to login page
-                                //Toast.makeText(SignupActivity.this, "SignUp Successful", Toast.LENGTH_LONG).show();
-                                //startActivity(new Intent(SignupActivity.this, LoginActivity.class));
                             } else {
                                 // otherwise, display error msg
-                                //Toast.makeText(SignupActivity.this, "SignUp Failed" + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                                tvSignupMsg.setText("SignUp Failed: " + task.getException().getMessage());
+                                tvSignupMsg.setText("Signup Failed: " + task.getException().getMessage());
                             }
                         }
                     });

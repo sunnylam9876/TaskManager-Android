@@ -7,6 +7,9 @@
     <item android:title="List"
         android:icon="@drawable/baseline_checklist_rtl_24"
         android:id="@+id/list"/>
+    <item android:title="Add Item"
+        android:icon="@drawable/baseline_playlist_add_24"
+        android:id="@+id/AddItem"/>
     <item android:title="Settings"
         android:icon="@drawable/baseline_settings_24"
         android:id="@+id/settings"/>

@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
             if (item.getItemId() == R.id.AddItem) {
                 //replaceFragment(new ListFragment());
                 //FragmentUtility.replaceFragment(MainActivity.this, new ListFragment());
+                FragmentUtility.replaceFragment(MainActivity.this, new AddItemFragment());
 
             }
             if (item.getItemId() == R.id.settings) {

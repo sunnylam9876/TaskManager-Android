@@ -3,6 +3,7 @@ package com.example.taskmanager;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -35,6 +36,8 @@ public class SignupActivity extends AppCompatActivity {
     private Button btnSignup;
     private TextView tvSignupMsg;
 
+    private Context context;
+
     String[] roles = {"Patient", "Doctor"};
     AutoCompleteTextView tvSignupRole;
     ArrayAdapter<String> roleAdapter;
@@ -46,7 +49,7 @@ public class SignupActivity extends AppCompatActivity {
 
     //Firebase connection
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private CollectionReference collectionReference = db.collection("Users");
+    private CollectionReference userCollection = db.collection("Users");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +116,8 @@ public class SignupActivity extends AppCompatActivity {
                                 userObj.put("userEmail", userEmail);
                                 userObj.put("userRole", userRole);
 
-                                // adding users to Firestore
-                                collectionReference.add(userObj)
+                                // adding users to Firestore database
+                                userCollection.add(userObj)
                                         .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                                             @Override
                                             public void onSuccess(DocumentReference documentReference) {
@@ -126,11 +129,19 @@ public class SignupActivity extends AppCompatActivity {
                                                                     String name = task.getResult().getString("userName");
 
                                                                     Toast.makeText(SignupActivity.this, "SignUp Successful", Toast.LENGTH_LONG).show();
+
                                                                     // if the user is registered successfully, redirect the user to DashBoardActivity
-                                                                    Intent i = new Intent(SignupActivity.this, DashBoardActivity.class);
-                                                                    i.putExtra("userName", name);
-                                                                    i.putExtra("userId", currentUserId);
-                                                                    startActivity(i);
+                                                                    // save the information to intent
+                                                                    Intent i = new Intent(SignupActivity.this, MainActivity.class);
+                                                                    Bundle bundle = new Bundle();
+                                                                    bundle.putString("userName", userName);
+                                                                    bundle.putString("userId", currentUserId);
+                                                                    bundle.putString("userEmail", userEmail);
+                                                                    bundle.putString("userRole", userRole);
+                                                                    i.putExtras(bundle);
+
+                                                                    //redirect to MainActivity
+                                                                    context.startActivity(i);
                                                                 }
                                                             }
                                                         });

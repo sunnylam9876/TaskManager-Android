@@ -109,7 +109,6 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             cellTask = itemView.findViewById(R.id.cellTask);
             calendarCell = itemView.findViewById(R.id.calendarCell);
 
-
             calendarCell.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

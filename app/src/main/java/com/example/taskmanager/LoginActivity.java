@@ -1,8 +1,11 @@
 package com.example.taskmanager;
 
+import static androidx.appcompat.widget.ResourceManagerInternal.get;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Patterns;
@@ -17,6 +20,10 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,11 +37,17 @@ public class LoginActivity extends AppCompatActivity {
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
 
+    //Firebase connection
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private CollectionReference userCollection = db.collection("Users");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        Context context = this;
 
         auth = FirebaseAuth.getInstance();
 
@@ -46,9 +59,56 @@ public class LoginActivity extends AppCompatActivity {
 
         currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-            // user is already logged in
+            // if user is already logged in, get the user name and user id
+
+            //get the user Id
             final String currentUserId = currentUser.getUid();
-            startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
+
+            // query the Firestore collection to get the user information
+            userCollection.whereEqualTo("userId", currentUserId)
+                    .get()
+                    .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                        @Override
+                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                            if (!queryDocumentSnapshots.isEmpty()) {
+                                // Get the first document (there should be only one with the provided UID)
+                                DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+
+                                // Access user information fields from the document
+                                String userId = documentSnapshot.getString("userId");
+                                String userName = documentSnapshot.getString("userName");
+                                String userEmail = documentSnapshot.getString("userEmail");
+                                String userRole = documentSnapshot.getString("userRole");
+
+                                // save the information to intent
+                                Intent i = new Intent(LoginActivity.this, MainActivity.class);
+                                Bundle bundle = new Bundle();
+                                bundle.putString("userName", userName);
+                                bundle.putString("userId", userId);
+                                bundle.putString("userEmail", userEmail);
+                                bundle.putString("userRole", userRole);
+                                i.putExtras(bundle);
+
+                                //redirect to MainActivity
+                                context.startActivity(i);
+                            } else {
+                                // No user document found for the given UID
+                                // Handle the case where the user data is missing
+                                Toast.makeText(LoginActivity.this, "Error getting user information", Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    })
+                    .addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // Handle any errors that occurred during the retrieval process
+                        }
+                    });
+
+
+
+
+
         }
 
         // set login button onClick listener
@@ -65,7 +125,8 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(AuthResult authResult) {
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
+                                        //startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
+                                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                         finish();
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {

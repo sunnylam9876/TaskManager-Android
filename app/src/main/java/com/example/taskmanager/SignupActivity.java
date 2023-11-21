@@ -109,7 +109,7 @@ public class SignupActivity extends AppCompatActivity {
                                 assert currentUser != null;
                                 final String currentUserId = currentUser.getUid();
 
-                                // create a userMap so that we can create a user in the User Collection in Firebase
+                                // create a userMap so that we can create a user in the User Collection in Firebase Firestore
                                 Map<String, String> userObj = new HashMap<>();
                                 userObj.put("userId", currentUserId);
                                 userObj.put("userName", userName);

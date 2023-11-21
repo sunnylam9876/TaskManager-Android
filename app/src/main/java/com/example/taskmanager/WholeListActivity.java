@@ -7,7 +7,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Bundle;
 
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
-import com.example.taskmanager.TaskList.TaskClass;
+
 
 import java.util.ArrayList;
 
@@ -32,7 +32,7 @@ public class WholeListActivity extends AppCompatActivity {
     //set the content of Task List
     private void setTaskList() {
         // define data sources
-        ArrayList<TaskClass> taskList = new ArrayList<>();
+/*        ArrayList<TaskClass> taskList = new ArrayList<>();
         TaskClass taskClass = new TaskClass("Task 1", "manager1", "member1", 2023, 11, 13);
         TaskClass taskClass1 = new TaskClass("Task 2", "manager2", "member2", 2023, 11, 14);
         TaskClass taskClass2 = new TaskClass("Task 3", "manager3", "member3", 2023, 11, 15);
@@ -46,6 +46,6 @@ public class WholeListActivity extends AppCompatActivity {
         taskListLayoutManager = new LinearLayoutManager(this);
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);
-        taskListAdapter.notifyDataSetChanged();
+        taskListAdapter.notifyDataSetChanged();*/
     }
 }

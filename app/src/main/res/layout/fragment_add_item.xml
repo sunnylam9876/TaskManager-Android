@@ -19,22 +19,22 @@
                 android:id="@+id/tvHeading"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:layout_marginBottom="16dp"
-                android:text="Input Task Details"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:text="Task Details"
                 android:textAlignment="center"
                 android:textColor="@color/black"
                 android:textSize="30sp"
                 android:textStyle="bold" />
 
             <EditText
-                android:id="@+id/etTaskTitle"
+                android:id="@+id/etInputTaskTitle"
                 android:layout_width="match_parent"
                 android:layout_height="55sp"
                 android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginEnd="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="5dp"
                 android:background="@drawable/background_edittext"
                 android:drawableStart="@drawable/baseline_event_note_24"
                 android:drawablePadding="10dp"
@@ -62,7 +62,7 @@
                 app:boxStrokeWidth="0dp">
 
                 <AutoCompleteTextView
-                    android:id="@+id/tvSelectPatient"
+                    android:id="@+id/tvInputPatient"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
@@ -83,13 +83,14 @@
                 android:orientation="horizontal">
 
                 <EditText
-                    android:id="@+id/etTaskTitle3"
+                    android:id="@+id/etInputDate"
                     android:layout_width="match_parent"
                     android:layout_height="55sp"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/background_edittext"
                     android:drawableStart="@drawable/baseline_calendar_month_24"
@@ -107,10 +108,10 @@
                     style="@style/Widget.AppCompat.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="5dp"
                     android:layout_weight="2"
                     android:text="Select Date"
                     android:textSize="16sp" />
@@ -123,13 +124,14 @@
                 android:layout_height="match_parent">
 
                 <EditText
-                    android:id="@+id/etTaskTitle2"
+                    android:id="@+id/etInputTime"
                     android:layout_width="match_parent"
                     android:layout_height="55sp"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="5dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="10dp"
                     android:layout_weight="1"
                     android:background="@drawable/background_edittext"
                     android:drawableStart="@drawable/baseline_av_timer_24"
@@ -147,23 +149,53 @@
                     style="@style/Widget.AppCompat.Button"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
                     android:layout_marginLeft="5dp"
-                    android:layout_marginTop="8dp"
                     android:layout_marginRight="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:layout_marginBottom="5dp"
                     android:layout_weight="2"
                     android:text="Select Time"
                     android:textSize="16sp" />
             </LinearLayout>
 
-            <EditText
-                android:id="@+id/editTextTextMultiLine"
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
-                android:layout_height="78dp"
+                android:layout_height="match_parent"
                 android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="5dp"
+
+                android:background="@drawable/background_edittext"
+                android:focusable="false"
+                android:outlineProvider="none"
+                app:boxStrokeColor="@android:color/transparent"
+                app:boxStrokeWidth="0dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/tvInputCategory"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/transparent"
+                    android:drawableStart="@drawable/baseline_category_24"
+                    android:drawablePadding="10dp"
+                    android:hint="Category"
+                    android:inputType="none"
+                    android:padding="16dp"
+                    android:text=""
+                    android:textColor="@color/black"
+                    android:textColorHint="@color/dark_grey" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <EditText
+                android:id="@+id/etInputDescription"
+                android:layout_width="match_parent"
+                android:layout_height="107dp"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="16dp"
+                android:layout_marginBottom="10dp"
                 android:background="@drawable/background_edittext"
                 android:drawableStart="@drawable/baseline_edit_note_24"
                 android:drawablePadding="10dp"
@@ -171,17 +203,19 @@
                 android:gravity="start|top"
                 android:hint="Task Description"
                 android:inputType="textMultiLine"
-                android:padding="16dp" />
+                android:padding="16dp"
+                android:scrollbars="vertical"
+                android:verticalScrollbarPosition="right" />
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/btnSubmit"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="5dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="32dp"
-                android:text="Submit"
+                android:layout_marginBottom="10dp"
+                android:text="Add"
                 android:textSize="22sp" />
 
 

@@ -106,7 +106,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             super(itemView);
 
             cellDayText = itemView.findViewById(R.id.cellDayText);
-            cellTask = itemView.findViewById(R.id.cellTask);
+            cellTask = itemView.findViewById(R.id.cellTask_1);
             calendarCell = itemView.findViewById(R.id.calendarCell);
 
 

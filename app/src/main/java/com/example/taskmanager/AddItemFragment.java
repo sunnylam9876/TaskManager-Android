@@ -23,6 +23,8 @@ import com.example.taskmanager.TaskList.TaskClass;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
@@ -31,7 +33,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddItemFragment extends Fragment {
     Context thisFragmentContext, context;
@@ -69,7 +74,7 @@ public class AddItemFragment extends Fragment {
 
 //---------------------------------------------------------------
     EditText etInputTaskTitle, etInputDate, etInputTime, etInputDescription;
-    Button btnSubmit;
+    Button btnSelectDate, btnSelectTime, btnSubmit;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,6 +86,8 @@ public class AddItemFragment extends Fragment {
         etInputDate = view.findViewById(R.id.etInputDate);
         etInputTime = view.findViewById(R.id.etInputTime);
         etInputDescription = view.findViewById(R.id.etInputDescription);
+        btnSelectDate = view.findViewById(R.id.btnSelectDate);
+        btnSelectTime = view.findViewById(R.id.btnSelectTime);
         btnSubmit =view.findViewById(R.id.btnSubmit);
 
         //------------------------------------------------------------------
@@ -160,6 +167,26 @@ public class AddItemFragment extends Fragment {
             }
         });
 
+        // Set Date picker onClick listener
+        btnSelectDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialDatePicker<Long> materialDatePicker = MaterialDatePicker.Builder.datePicker()
+                        .setTitleText("Select Date")
+                        .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                        .build();
+                materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+                    @Override
+                    public void onPositiveButtonClick(Long selection) {
+                        String date = new SimpleDateFormat("MM-dd-yyy", Locale.getDefault()).format(new Date(selection));
+                        etInputDate.setText(date);
+                    }
+                });
+                materialDatePicker.show(getActivity().getSupportFragmentManager(), "tag");
+            }
+        });
+
+        // Set submit button onClick listener
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

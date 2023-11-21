@@ -23,7 +23,7 @@ import android.widget.Toast;
 import com.example.taskmanager.Calendar.DateClass;
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
-import com.example.taskmanager.TaskList.TaskClass;
+
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -71,7 +71,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         // Since we are using Fragment which does not have its own Intent.
         // We need to access the intent from the host activity that contains the Fragment
-        //Intent intent = getActivity().getIntent();
         Bundle bundle = getActivity().getIntent().getExtras();
         if (bundle != null) {
             userId = bundle.getString("userId");
@@ -171,7 +170,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         Toast.makeText(thisFragmentContext, "Selected Day: " + day + " " + monthFromDate(selectedDate) + " " + yearFromDate(selectedDate), Toast.LENGTH_SHORT).show();
 
         // save the information to intent
-        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
+/*        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
         Bundle bundle = new Bundle();
         bundle.putString("userName", userName);
         bundle.putString("userId", userId);
@@ -181,13 +180,13 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         //redirect to MainActivity
         //context.startActivity(i);
-        startActivity(i);
+        startActivity(i);*/
     }
 
     //set the content of Task List
     private void setTaskList() {
         // define data sources
-        ArrayList<TaskClass> taskList = new ArrayList<>();
+        /*ArrayList<TaskClass> taskList = new ArrayList<>();
         TaskClass taskClass = new TaskClass("Task 1", "manager1", "member1", 2023, 11, 13);
         TaskClass taskClass1 = new TaskClass("Task 2", "manager2", "member2", 2023, 11, 14);
         TaskClass taskClass2 = new TaskClass("Task 3", "manager3", "member3", 2023, 11, 15);
@@ -201,6 +200,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         taskListLayoutManager = new LinearLayoutManager(thisFragmentContext);
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);
-        taskListAdapter.notifyDataSetChanged();
+        taskListAdapter.notifyDataSetChanged();*/
     }
 }

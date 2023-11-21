@@ -10,7 +10,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.taskmanager.Calendar.MyCalendarAdapter;
+
 import com.example.taskmanager.R;
 
 import java.util.List;
@@ -58,8 +58,8 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         TaskClass eachTask = taskList.get(position);
         holder.checkedTextView.setText(eachTask.getTaskTitle());
-        holder.tvTaskListDue.setText(eachTask.getDueYear() + " " + eachTask.getDueMonth() + eachTask.getDueDay());
-        holder.tvTaskBy.setText(eachTask.getTeamMember());
+        //holder.tvTaskListDue.setText(eachTask.getDueYear() + " " + eachTask.getDueMonth() + eachTask.getDueDay());
+        //holder.tvTaskBy.setText(eachTask.getTeamMember());
     }
 
     @Override

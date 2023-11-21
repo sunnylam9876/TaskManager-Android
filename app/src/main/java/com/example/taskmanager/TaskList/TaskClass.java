@@ -1,18 +1,28 @@
 package com.example.taskmanager.TaskList;
 
 public class TaskClass {
-    private String taskTitle, teamMember, teamManager;
-    private int dueYear, dueMonth, dueDay;
+    String taskTitle, doctorId, patientName, patientEmail, patientId;
+    String year, month, day, hour, minute, description, category, status;
 
-    //private String status;
+    // empty construction for Firebase
+    public TaskClass() {
 
-    public TaskClass(String taskTitle, String teamManager, String teamMember, int dueYear, int dueMonth, int dueDay) {
+    }
+
+    public TaskClass(String taskTitle, String doctorId, String patientName, String patientEmail, String patientId, String year, String month, String day, String hour, String minute, String description, String category, String status) {
         this.taskTitle = taskTitle;
-        this.teamMember = teamMember;
-        this.teamManager = teamManager;
-        this.dueYear = dueYear;
-        this.dueMonth = dueMonth;
-        this.dueDay = dueDay;
+        this.doctorId = doctorId;
+        this.patientName = patientName;
+        this.patientEmail = patientEmail;
+        this.patientId = patientId;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minute = minute;
+        this.description = description;
+        this.category = category;
+        this.status = status;
     }
 
     public String getTaskTitle() {
@@ -23,43 +33,99 @@ public class TaskClass {
         this.taskTitle = taskTitle;
     }
 
-    public String getTeamMember() {
-        return teamMember;
+    public String getDoctorId() {
+        return doctorId;
     }
 
-    public void setTeamMember(String teamMember) {
-        this.teamMember = teamMember;
+    public void setDoctorId(String doctorId) {
+        this.doctorId = doctorId;
     }
 
-    public String getTeamManager() {
-        return teamManager;
+    public String getPatientName() {
+        return patientName;
     }
 
-    public void setTeamManager(String teamManager) {
-        this.teamManager = teamManager;
+    public void setPatientName(String patientName) {
+        this.patientName = patientName;
     }
 
-    public int getDueYear() {
-        return dueYear;
+    public String getPatientEmail() {
+        return patientEmail;
     }
 
-    public void setDueYear(int dueYear) {
-        this.dueYear = dueYear;
+    public void setPatientEmail(String patientEmail) {
+        this.patientEmail = patientEmail;
     }
 
-    public int getDueMonth() {
-        return dueMonth;
+    public String getPatientId() {
+        return patientId;
     }
 
-    public void setDueMonth(int dueMonth) {
-        this.dueMonth = dueMonth;
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
     }
 
-    public int getDueDay() {
-        return dueDay;
+    public String getYear() {
+        return year;
     }
 
-    public void setDueDay(int dueDay) {
-        this.dueDay = dueDay;
+    public void setYear(String year) {
+        this.year = year;
+    }
+
+    public String getMonth() {
+        return month;
+    }
+
+    public void setMonth(String month) {
+        this.month = month;
+    }
+
+    public String getDay() {
+        return day;
+    }
+
+    public void setDay(String day) {
+        this.day = day;
+    }
+
+    public String getHour() {
+        return hour;
+    }
+
+    public void setHour(String hour) {
+        this.hour = hour;
+    }
+
+    public String getMinute() {
+        return minute;
+    }
+
+    public void setMinute(String minute) {
+        this.minute = minute;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

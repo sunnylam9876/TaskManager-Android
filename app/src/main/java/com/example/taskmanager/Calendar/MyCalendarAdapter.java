@@ -83,11 +83,10 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
 
         // to be amended to not get the value of a TextView to increase efficiency
         //int holderDay = Integer.parseInt(holder.cellDayText.getText().toString());
-        if (Integer.parseInt(holder.cellTask.getText().toString()) > 0) {
+/*        if (Integer.parseInt(holder.cellTask.getText().toString()) > 0) {
             Drawable drawable = ContextCompat.getDrawable(holder.cellTask.getContext(), R.drawable.task_cell_background);
             holder.cellTask.setBackground(drawable);
-
-        }
+        }*/
     }
 
     @Override
@@ -106,7 +105,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             super(itemView);
 
             cellDayText = itemView.findViewById(R.id.cellDayText);
-            cellTask = itemView.findViewById(R.id.cellTask_1);
+            //cellTask = itemView.findViewById(R.id.cellTask_1);
             calendarCell = itemView.findViewById(R.id.calendarCell);
 
 

@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
     android:background="@drawable/border_background">
 
     <LinearLayout
@@ -17,9 +18,10 @@
 
         <TextView
             android:id="@+id/cellDayText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal"
             android:text="1"
             android:textColor="@color/black"
             android:textSize="20sp" />
@@ -29,29 +31,19 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/cellTask_1"
+            <ImageView
+                android:id="@+id/imageView5"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
                 android:layout_weight="1"
-                android:text="1"
-                android:textAlignment="center"
-                android:textSize="12sp" />
+                app:srcCompat="@drawable/baseline_circle_red_24" />
 
-            <TextView
-                android:id="@+id/cellTask_2"
+            <ImageView
+                android:id="@+id/imageView6"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
                 android:layout_weight="1"
-                android:text="1"
-                android:textAlignment="center"
-                android:textSize="12sp" />
+                app:srcCompat="@drawable/baseline_circle_cyan_24" />
 
         </LinearLayout>
 
@@ -61,29 +53,20 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/cellTask_3"
+            <ImageView
+                android:id="@+id/imageView9"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
                 android:layout_weight="1"
-                android:text="1"
-                android:textAlignment="center"
-                android:textSize="12sp" />
+                app:srcCompat="@drawable/baseline_circle_purple_24" />
 
-            <TextView
-                android:id="@+id/cellTask_4"
+            <ImageView
+                android:id="@+id/imageView8"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginLeft="2dp"
-                android:layout_marginRight="2dp"
                 android:layout_weight="1"
-                android:text="1"
-                android:textAlignment="center"
-                android:textSize="12sp" />
+                app:srcCompat="@drawable/baseline_circle_green24" />
+
         </LinearLayout>
 
     </LinearLayout>

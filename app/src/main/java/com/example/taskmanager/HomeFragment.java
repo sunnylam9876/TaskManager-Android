@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -22,7 +23,17 @@ import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.DateClass;
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
+import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 
 import java.time.LocalDate;
@@ -34,11 +45,12 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
     Context thisFragmentContext, context;
 
+    View view;
     public String userName, userId, userEmail, userRole;
 
     private TextView tvUserName;
 
-    //------------------------------------------------------------------
+//------------------------------------------------------------------
     // for calendar recycler view
     private TextView tvMonthYear, tvFwd, tvBwd;     // TextView for choosing the month of calendar
     private RecyclerView rvCalendar;
@@ -47,7 +59,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private ArrayList<String> daysInMonth;
     private LocalDate selectedDate;
     private DateClass dateClass;      //custom date class
-    //------------------------------------------------------------------
+//------------------------------------------------------------------
 
     //set Task List
     private RecyclerView rvDashboardTaskList;
@@ -55,7 +67,15 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private RecyclerView.Adapter taskListAdapter;
     //private ArrayList<TaskClass> taskList;
 
-    //------------------------------------------------------------------
+//---------------------------------------------------------------
+    // connection to Firebase Realtime database
+    FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
+
+    // connection to Firebase Firestore database
+    private FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
+    private CollectionReference taskCollection = firestore_db.collection("Tasks");  // tasks collection
+    private CollectionReference userCollection = firestore_db.collection("Users");  // users collection
+//------------------------------------------------------------------
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -63,7 +83,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         thisFragmentContext = requireContext();
 
         // Inflate the layout for this fragment
-        View view = inflater.inflate(R.layout.fragment_home, container, false);
+        view = inflater.inflate(R.layout.fragment_home, container, false);
 
         //------------------------------------------------------------------
         //Load user name and uer id
@@ -111,6 +131,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         //------------------------------------------------------------------
 
+        LoadDataFromDB();
         return view;
     }
 
@@ -201,5 +222,46 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);
         taskListAdapter.notifyDataSetChanged();*/
+    }
+
+//------------------------------------------------------------------
+    private void LoadDataFromDB() {
+        int year = 2023;
+        int month = 11;
+        int day = 21;
+        String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
+        String status = "Pending";
+        String category = "Others";
+
+        Query query = taskCollection
+                .whereEqualTo("year", year)
+                .whereEqualTo("month", month)
+                .whereEqualTo("day", day)
+                .whereEqualTo("patientId", patientId)
+                .whereEqualTo("status", status)
+                .whereEqualTo("category", category);
+
+        // Execute the query to get the matching documents
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    // Get the result of the query
+                    QuerySnapshot querySnapshot = task.getResult();
+
+                    // Get the number of matching documents
+                    int numberOfDocuments = querySnapshot.size();
+
+                    // Now, numberOfDocuments contains the count of documents that meet the conditions
+                    Toast.makeText(thisFragmentContext, Integer.toString(numberOfDocuments), Toast.LENGTH_LONG).show();
+
+                } else {
+                    // Handle the error
+                    //Log.w("Firestore Query", "Error getting documents.", task.getException());
+                    Toast.makeText(thisFragmentContext, task.getException().toString(), Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
     }
 }

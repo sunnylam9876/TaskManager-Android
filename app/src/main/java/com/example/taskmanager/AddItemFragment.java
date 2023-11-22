@@ -20,11 +20,14 @@ import android.widget.Toast;
 
 import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.TaskClass;
+import com.example.taskmanager.Utility.CalculateDate;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
@@ -33,8 +36,12 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -73,8 +80,10 @@ public class AddItemFragment extends Fragment {
     String selectedCategory;
 
 //---------------------------------------------------------------
-    EditText etInputTaskTitle, etInputDate, etInputTime, etInputDescription;
-    Button btnSelectDate, btnSelectTime, btnSubmit;
+    EditText etInputTaskTitle, etInputDescription;
+    Button  btnSubmit;
+    TextView tvInputTime, tvInputDate;
+    int inputYear, inputMonth, inputDay, inputHour, inputMinute;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -83,14 +92,12 @@ public class AddItemFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_add_item, container, false);
 
         etInputTaskTitle = view.findViewById(R.id.etInputTaskTitle);
-        etInputDate = view.findViewById(R.id.etInputDate);
-        etInputTime = view.findViewById(R.id.etInputTime);
         etInputDescription = view.findViewById(R.id.etInputDescription);
-        btnSelectDate = view.findViewById(R.id.btnSelectDate);
-        btnSelectTime = view.findViewById(R.id.btnSelectTime);
         btnSubmit =view.findViewById(R.id.btnSubmit);
+        tvInputDate = view.findViewById(R.id.tvInputDate);
+        tvInputTime = view.findViewById(R.id.tvInputTime);
 
-        //------------------------------------------------------------------
+//------------------------------------------------------------------
         //Load user name and uer id
          TextView tvHeading = view.findViewById(R.id.tvHeading);
 
@@ -107,7 +114,7 @@ public class AddItemFragment extends Fragment {
             //tvHeading.setText(userName + " (" + userRole +")");
         }
 
-        //------------------------------------------------------------------
+//------------------------------------------------------------------
         // get Patient list from Firestore
         userCollection
                 .whereEqualTo("userRole", "Patient")
@@ -148,7 +155,70 @@ public class AddItemFragment extends Fragment {
             }
         });
 
-        //------------------------------------------------------------------
+
+
+//------------------------------------------------------------------
+        // Set Date picker onClick listener
+        tvInputDate.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialDatePicker<Long> materialDatePicker = MaterialDatePicker.Builder.datePicker()
+                        .setTitleText("Select Date")
+                        .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
+                        .build();
+                materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+                    @Override
+                    public void onPositiveButtonClick(Long selection) {
+                        String date = new SimpleDateFormat("MMM-dd-yyyy", Locale.getDefault()).format(new Date(selection));
+                        tvInputDate.setText(date);
+
+                        // Convert the selected timestamp to Calendar
+                        Calendar calendar = Calendar.getInstance();
+                        calendar.setTimeInMillis(selection);
+
+                        // Extract month, day, and year values
+                        inputYear = calendar.get(Calendar.YEAR);
+                        inputMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
+                        inputDay = calendar.get(Calendar.DAY_OF_MONTH);
+
+                        //Toast.makeText(thisFragmentContext, inputYear + "-" + inputMonth + "-" + inputDay, Toast.LENGTH_LONG).show();
+                    }
+                });
+                materialDatePicker.show(getActivity().getSupportFragmentManager(), "tag");
+            }
+        });
+
+//------------------------------------------------------------------
+        // Set Time picker onClick listener
+        tvInputTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
+                        .setTimeFormat(TimeFormat.CLOCK_24H)
+                        .setHour(12)
+                        .setMinute(0)
+                        .setInputMode(MaterialTimePicker.INPUT_MODE_KEYBOARD)
+                        .setTitleText("Pick Time (24 hrs format)")
+                        .build();
+                timePicker.addOnPositiveButtonClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String hourString = String.format(Locale.getDefault(), "%02d", timePicker.getHour());
+                        String minuteString = String.format(Locale.getDefault(), "%02d", timePicker.getMinute());
+                        tvInputTime.setText(hourString + ":" + minuteString);
+                        //int hour = Integer.parseInt(tvInputTime.getText().toString().substring(0,2));
+                        //int minute = Integer.parseInt(tvInputTime.getText().toString().substring(3));
+                        inputHour = Integer.parseInt(hourString);
+                        inputMinute = Integer.parseInt(minuteString);
+                        //Toast.makeText(thisFragmentContext, inputHour + " : " + inputMinute, Toast.LENGTH_LONG).show();
+                    }
+                });
+                timePicker.show(getActivity().getSupportFragmentManager(), "tag");
+
+            }
+        });
+
+//------------------------------------------------------------------
         // Add categories to the Category drop-down menu
         tvCategory = view.findViewById(R.id.tvInputCategory);
 
@@ -167,25 +237,7 @@ public class AddItemFragment extends Fragment {
             }
         });
 
-        // Set Date picker onClick listener
-        btnSelectDate.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MaterialDatePicker<Long> materialDatePicker = MaterialDatePicker.Builder.datePicker()
-                        .setTitleText("Select Date")
-                        .setSelection(MaterialDatePicker.todayInUtcMilliseconds())
-                        .build();
-                materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-                    @Override
-                    public void onPositiveButtonClick(Long selection) {
-                        String date = new SimpleDateFormat("MM-dd-yyy", Locale.getDefault()).format(new Date(selection));
-                        etInputDate.setText(date);
-                    }
-                });
-                materialDatePicker.show(getActivity().getSupportFragmentManager(), "tag");
-            }
-        });
-
+//------------------------------------------------------------------
         // Set submit button onClick listener
         btnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -212,14 +264,9 @@ public class AddItemFragment extends Fragment {
         String description = etInputDescription.getText().toString().trim();
         String category = selectedCategory;
         String status = "Pending";
-        int year = 2023;
-        int month = 11;
-        int day = 20;
-        int hour = 8;
-        int minute = 20;
 
         TaskClass newTask = new TaskClass(taskTitle, doctorId, patientName, patientEmail, patientId,
-                description, category, status, year, month, day, hour, minute);
+                description, category, status, inputYear, inputMonth, inputDay, inputHour, inputMinute);
 
         taskCollection.add(newTask)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {

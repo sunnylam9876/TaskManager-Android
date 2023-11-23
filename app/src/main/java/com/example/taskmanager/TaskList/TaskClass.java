@@ -6,7 +6,7 @@ public class TaskClass {
 
     int year, month, day, hour, minute;
 
-    // empty construction for Firebase
+    // empty constructor for Firebase
     public TaskClass() {
 
     }

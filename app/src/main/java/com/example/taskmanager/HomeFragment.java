@@ -1,12 +1,10 @@
 package com.example.taskmanager;
 
-import static android.content.Intent.getIntent;
 import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.monthYearFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -23,11 +21,11 @@ import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.DateClass;
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
-import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
+import com.example.taskmanager.TaskList.TaskCategoryClass;
+import com.example.taskmanager.TaskList.TaskClass;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -57,6 +55,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private RecyclerView.LayoutManager calendarLayoutManager;
     private RecyclerView.Adapter calendarAdapter;
     private ArrayList<String> daysInMonth;
+
+
     private LocalDate selectedDate;
     private DateClass dateClass;      //custom date class
 //------------------------------------------------------------------
@@ -65,7 +65,13 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private RecyclerView rvDashboardTaskList;
     private RecyclerView.LayoutManager taskListLayoutManager;
     private RecyclerView.Adapter taskListAdapter;
-    //private ArrayList<TaskClass> taskList;
+    private ArrayList<TaskClass> taskList;
+    ArrayList<TaskCategoryClass> taskInDay;
+//    private ArrayList<TaskCategoryClass> taskInDay;
+    int[] appointment = new int[32];
+    int[] medicine = new int[32];
+    int[] workout = new int[32];
+    int[] others = new int[32];
 
 //---------------------------------------------------------------
     // connection to Firebase Realtime database
@@ -85,6 +91,11 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        taskList = new ArrayList<>();
+        taskInDay = new ArrayList<>();
+
+
+
         //------------------------------------------------------------------
         //Load user name and uer id
         tvUserName = view.findViewById(R.id.tvUserName);
@@ -102,14 +113,19 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         }
 
         //------------------------------------------------------------------
+
+
         //set calendar
         rvCalendar = view.findViewById(R.id.rvCalendar);
         tvMonthYear = view.findViewById(R.id.tvMonthYear);
         selectedDate = LocalDate.now();
-        setMonthView();
+        //setMonthView();
 
         tvFwd = view.findViewById(R.id.tvFwd);
         tvBwd = view.findViewById(R.id.tvBwd);
+
+        LoadDataFromDB();   // load data from Firestore
+
         tvFwd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -131,12 +147,14 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         //------------------------------------------------------------------
 
-        LoadDataFromDB();
+
         return view;
     }
 
     // set the recycler view to display the calendar
     private void setMonthView() {
+
+
         //define sources
         daysInMonth = daysInMonthArray(selectedDate);
         dateClass = new DateClass(yearFromDate(selectedDate), monthFromDate(selectedDate), daysInMonth);
@@ -145,7 +163,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         tvMonthYear.setText(monthYearFromDate(selectedDate));
 
         // feed the data to recycler view
-        calendarAdapter = new MyCalendarAdapter(dateClass, thisFragmentContext);
+        calendarAdapter = new MyCalendarAdapter(dateClass, taskInDay, thisFragmentContext);
         calendarLayoutManager = new GridLayoutManager(thisFragmentContext.getApplicationContext(), 7);
         rvCalendar.setLayoutManager(calendarLayoutManager);
         rvCalendar.setAdapter(calendarAdapter);
@@ -155,7 +173,9 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
     // get the days in a month and convert them to an array
     private ArrayList<String> daysInMonthArray(LocalDate date) {
+
         ArrayList<String> daysInMonthArray = new ArrayList<>();
+
         YearMonth yearMonth = YearMonth.from(date);
 
         int daysInMonth = yearMonth.lengthOfMonth();
@@ -165,9 +185,31 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         for (int i = 1; i <= 42; i++) {
             if (i <= dayOfWeek || i > daysInMonth + dayOfWeek) {
                 daysInMonthArray.add("");
+                TaskCategoryClass task = new TaskCategoryClass();
+                taskInDay.add(task);
             }
             else {
-                daysInMonthArray.add(String.valueOf(i - dayOfWeek));
+                int day = i - dayOfWeek;
+                daysInMonthArray.add(String.valueOf(day));
+
+                // Insert no. of task
+                TaskCategoryClass task = new TaskCategoryClass(appointment[day], medicine[day], workout[day], others[day]);
+                taskInDay.add(task);
+            }
+        }
+
+        // delete empty row of the calendar
+        if (daysInMonthArray.get(35) == "") {   // delete end portion
+            for (int i = 41; i >= 35; i--) {
+                daysInMonthArray.remove(i);
+                taskInDay.remove(i);
+            }
+        }
+
+        if (daysInMonthArray.get(6) == "") {   // delete start portion
+            for (int i = 6; i >= 0; i--) {
+                daysInMonthArray.remove(i);
+                taskInDay.remove(i);
             }
         }
         return daysInMonthArray;
@@ -176,19 +218,22 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     // subtract the month by 1 when the user click backward button of the calendar
     public void previousMonthAction(View view) {
         selectedDate = selectedDate.minusMonths(1);
-        setMonthView();
+        LoadDataFromDB();   // load data from Firestore
+        //setMonthView();
     }
 
     // add the month by 1 when the user click forward button of the calendar
     public void nextMonthAction(View view) {
         selectedDate = selectedDate.plusMonths(1);
-        setMonthView();
+        LoadDataFromDB();   // load data from Firestore
+        //setMonthView();
     }
 
     // do something if the user click any one of the day on the calendar
     @Override
     public void onItemClick(String day) {
         Toast.makeText(thisFragmentContext, "Selected Day: " + day + " " + monthFromDate(selectedDate) + " " + yearFromDate(selectedDate), Toast.LENGTH_SHORT).show();
+
 
         // save the information to intent
 /*        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
@@ -206,59 +251,88 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
     //set the content of Task List
     private void setTaskList() {
-        // define data sources
-        /*ArrayList<TaskClass> taskList = new ArrayList<>();
-        TaskClass taskClass = new TaskClass("Task 1", "manager1", "member1", 2023, 11, 13);
-        TaskClass taskClass1 = new TaskClass("Task 2", "manager2", "member2", 2023, 11, 14);
-        TaskClass taskClass2 = new TaskClass("Task 3", "manager3", "member3", 2023, 11, 15);
-        TaskClass taskClass3 = new TaskClass("Task 4", "manager4", "member4", 2023, 11, 16);
-        taskList.add(taskClass);
-        taskList.add(taskClass1);
-        taskList.add(taskClass2);
-        taskList.add(taskClass3);
+        // sources is taskList
 
         taskListAdapter = new MyTaskListAdapter(taskList, thisFragmentContext);
         taskListLayoutManager = new LinearLayoutManager(thisFragmentContext);
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);
-        taskListAdapter.notifyDataSetChanged();*/
+        taskListAdapter.notifyDataSetChanged();
     }
 
 //------------------------------------------------------------------
     private void LoadDataFromDB() {
-        int year = 2023;
-        int month = 11;
+
+        int year = selectedDate.getYear();
+        int month = selectedDate.getMonthValue();
         int day = 21;
         String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
         String status = "Pending";
-        String category = "Others";
+        //String category = "Others";
+
+        // Clear the lists first
+        taskList.clear();
+        taskInDay.clear();
 
         Query query = taskCollection
                 .whereEqualTo("year", year)
                 .whereEqualTo("month", month)
-                .whereEqualTo("day", day)
+                //.whereEqualTo("day", day)
                 .whereEqualTo("patientId", patientId)
-                .whereEqualTo("status", status)
-                .whereEqualTo("category", category);
+                .whereEqualTo("status", status);
+                //.orderBy("day");
+                //.whereEqualTo("category", category);
 
         // Execute the query to get the matching documents
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
-                    // Get the result of the query
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        TaskClass eachTask = document.toObject(TaskClass.class);
+                        taskList.add(eachTask);
+                    }
+
+
+                    for (int i = 0; i <= 31; i++) {
+                        //TaskCategoryClass taskCategoryClass = new TaskCategoryClass();
+                        //taskInDay.add(taskCategoryClass);
+                        appointment[i] = 0;
+                        medicine[i] = 0;
+                        workout[i] = 0;
+                        others[i] = 0;
+                    }
+
+                    // Loop through the downloaded data
+                    for (int i = 0; i < taskList.size(); i++) {
+                        int day = taskList.get(i).getDay();
+                        String status = taskList.get(i).getCategory();
+                        if (status.equals("Appointment"))
+                            appointment[day]++;
+                        if (status.equals("Medicine"))
+                            medicine[day]++;
+                        if (status.equals("Workout"))
+                            workout[day]++;
+                        if (status.equals("Others"))
+                            others[day]++;
+                    }
+
+                    setMonthView();
+
+                    setTaskList();
+
+                    /*// Get the result of the query
                     QuerySnapshot querySnapshot = task.getResult();
 
                     // Get the number of matching documents
-                    int numberOfDocuments = querySnapshot.size();
+                    int numberOfDocuments = querySnapshot.size();*/
 
                     // Now, numberOfDocuments contains the count of documents that meet the conditions
-                    Toast.makeText(thisFragmentContext, Integer.toString(numberOfDocuments), Toast.LENGTH_LONG).show();
+                    //Toast.makeText(thisFragmentContext, Integer.toString(numberOfDocuments), Toast.LENGTH_LONG).show();
 
                 } else {
                     // Handle the error
-                    //Log.w("Firestore Query", "Error getting documents.", task.getException());
-                    Toast.makeText(thisFragmentContext, task.getException().toString(), Toast.LENGTH_LONG).show();
+                    Toast.makeText(thisFragmentContext, "Error: " + task.getException().toString(), Toast.LENGTH_LONG).show();
                 }
             }
         });

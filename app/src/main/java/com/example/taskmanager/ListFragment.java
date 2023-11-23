@@ -8,6 +8,9 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
+
+import com.example.taskmanager.TaskList.TaskClass;
 
 
 public class ListFragment extends Fragment {
@@ -19,6 +22,19 @@ public class ListFragment extends Fragment {
 
         thisFragmentContext = requireContext();
         View view = inflater.inflate(R.layout.fragment_list, container, false);
+
+        //Bundle bundle = getActivity().getIntent().getExtras();
+        Bundle bundle = getArguments();
+        if (bundle != null) {
+
+            Boolean update = bundle.getBoolean("update");
+            TaskClass taskDetail = bundle.getParcelable("taskDetails");
+            String test = bundle.getString("test");
+
+            //for testing only
+            TextView tvHeading = view.findViewById(R.id.tvHeading);
+            tvHeading.setText("update: " + update + "; test: " + test);
+        }
 
         return view;
     }

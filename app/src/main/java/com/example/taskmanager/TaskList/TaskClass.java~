@@ -1,11 +1,6 @@
 package com.example.taskmanager.TaskList;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-import androidx.annotation.NonNull;
-
-public class TaskClass implements Parcelable {
+public class TaskClass {
     String id, taskTitle, doctorId, patientName, patientEmail, patientId;
     String description, category, status;
 
@@ -148,13 +143,4 @@ public class TaskClass implements Parcelable {
     }
 
 
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(@NonNull Parcel dest, int flags) {
-
-    }
 }

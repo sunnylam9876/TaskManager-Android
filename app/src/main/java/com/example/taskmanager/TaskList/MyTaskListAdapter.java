@@ -1,18 +1,34 @@
 package com.example.taskmanager.TaskList;
 
 import android.content.Context;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.example.taskmanager.AddItemFragment;
+import com.example.taskmanager.ListFragment;
+import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
+import com.example.taskmanager.Utility.FragmentUtility;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 
@@ -31,8 +47,9 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public CheckedTextView checkedTextView;
         public TextView tvTaskListDue;
-
         public ImageView ivCategory;
+
+        public ImageButton btnDelete, btnViewMore;
 
         // constructor
         public MyViewHolder(@NonNull View itemView) {
@@ -41,11 +58,13 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
             checkedTextView = itemView.findViewById(R.id.checkedTextView);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
             ivCategory = itemView.findViewById(R.id.ivCategory);
+            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnViewMore = itemView.findViewById(R.id.btnViewMore);
 
-
-            // add OnClickListener:
 
         }
+
+
     }
 
     // 3- implementing the methods
@@ -84,13 +103,75 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                 break;
 
         }
+//---------------------------------------------------------------------------------------------------------------------------------
+        // To delete a task
+        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    TaskClass taskToDelete = taskList.get(adapterPosition);
 
-        //holder.tvTaskListDue.setText(eachTask.getDueYear() + " " + eachTask.getDueMonth() + eachTask.getDueDay());
-        //holder.tvTaskBy.setText(eachTask.getTeamMember());
+                    // Ge the document id of the Firestore document to delete
+                    String documentId = taskToDelete.getId();
+                    FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
+                    CollectionReference taskCollection = firestore_db.collection("Tasks");  // tasks collection
+
+                    taskCollection.document(documentId)
+                            .delete()
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    // Document successfully deleted
+                                    taskList.remove(adapterPosition);
+                                    notifyItemRemoved(adapterPosition);
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
+            }
+        });
+//---------------------------------------------------------------------------------------------------------------------------------
+        // To view the task details
+        holder.btnViewMore.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    TaskClass taskToShowDetails = taskList.get(adapterPosition);
+
+                    // Create a bundle to pass task details to other Fragment
+                    Bundle bundle = new Bundle();
+                    bundle.putParcelable("taskDetails", taskToShowDetails);
+                    bundle.putString("test", "testing");
+                    bundle.putBoolean("update", true);
+
+                    // Navigate to other Fragment
+                    AddItemFragment addItemFragment = new AddItemFragment();
+                    //ListFragment addItemFragment = new ListFragment();
+                    addItemFragment.setArguments(bundle);
+
+                    // Use FragmentManager to replace the current fragment with AddItemFragment
+                    FragmentManager fragmentManager = ((AppCompatActivity) context).getSupportFragmentManager();
+                    FragmentTransaction transaction = fragmentManager.beginTransaction();
+                    transaction.replace(R.id.frame_layout, addItemFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                }
+            }
+        });
+
     }
 
     @Override
     public int getItemCount() {
         return taskList.size();
     }
+
+
 }

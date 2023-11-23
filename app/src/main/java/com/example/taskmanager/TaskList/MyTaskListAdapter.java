@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckedTextView;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,7 +30,9 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     //2 define view holder
     public static class MyViewHolder extends RecyclerView.ViewHolder {
         public CheckedTextView checkedTextView;
-        public TextView tvTaskListDue, tvTaskBy;
+        public TextView tvTaskListDue;
+
+        public ImageView ivCategory;
 
         // constructor
         public MyViewHolder(@NonNull View itemView) {
@@ -37,7 +40,8 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
             checkedTextView = itemView.findViewById(R.id.checkedTextView);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
-            tvTaskBy = itemView.findViewById(R.id.tvTaskListBy);
+            ivCategory = itemView.findViewById(R.id.ivCategory);
+
 
             // add OnClickListener:
 
@@ -56,8 +60,31 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        // Assign title, due date and color for the list
         TaskClass eachTask = taskList.get(position);
         holder.checkedTextView.setText(eachTask.getTaskTitle());
+        holder.tvTaskListDue.setText(eachTask.getMonth() + "-" + eachTask.getDay() + "-" + eachTask.getYear() + " (" +
+                                        eachTask.getHour() + ":" + eachTask.getMinute() + ")");
+
+        switch(eachTask.getCategory()) {
+            case "Appointment":
+                holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_appointment_24));
+                break;
+
+            case "Medicine":
+                holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_medicine_24));
+                break;
+
+            case "Workout":
+                holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_workout_24));
+                break;
+
+            case "Others":
+                holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_others_24));
+                break;
+
+        }
+
         //holder.tvTaskListDue.setText(eachTask.getDueYear() + " " + eachTask.getDueMonth() + eachTask.getDueDay());
         //holder.tvTaskBy.setText(eachTask.getTeamMember());
     }

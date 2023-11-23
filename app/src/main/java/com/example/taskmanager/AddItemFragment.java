@@ -85,6 +85,8 @@ public class AddItemFragment extends Fragment {
     TextView tvInputTime, tvInputDate;
     int inputYear, inputMonth, inputDay, inputHour, inputMinute;
 
+    Boolean update;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -109,9 +111,21 @@ public class AddItemFragment extends Fragment {
             //userName = bundle.getString("userName");
             //userEmail = bundle.getString("userEmail");
             userRole = bundle.getString("userRole");
+        }
 
+        Bundle bundle_fragment = getArguments();
+        if (bundle_fragment != null) {
+            update = bundle_fragment.getBoolean("update");
+            TaskClass taskDetail = bundle_fragment.getParcelable("taskDetails");
             //for testing only
-            //tvHeading.setText(userName + " (" + userRole +")");
+            //tvHeading.setText("update: " + update + "; title: " + taskDetail.getTaskTitle());
+            etInputTaskTitle.setText(taskDetail.getTaskTitle());
+            etInputDescription.setText(taskDetail.getDescription());
+            //tvSelectPatient.setText(taskDetail.getPatientName());
+            //tvCategory.setText(taskDetail.getCategory());
+
+            //tvInputDate = view.findViewById(R.id.tvInputDate);
+            //tvInputTime = view.findViewById(R.id.tvInputTime);
         }
 
 //------------------------------------------------------------------

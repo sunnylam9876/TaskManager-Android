@@ -35,7 +35,7 @@
                 android:textColorHint="@color/dark_grey" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvWholeList"
+                android:id="@+id/rvList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
         </LinearLayout>

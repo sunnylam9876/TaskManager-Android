@@ -4,7 +4,6 @@ import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -44,10 +43,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -79,7 +75,7 @@ public class AddItemFragment extends Fragment {
     ArrayList<UserClass> patientList = new ArrayList<>();  // to store patient list get from Firestore db
     ArrayList<String> patientNameList = new ArrayList<>();  // to store patient name
     AutoCompleteTextView tvSelectPatient;
-    ArrayAdapter<String> memberAdapter;
+    ArrayAdapter<String> patientAdapter;
 
     int selectedPatientIndex;   // to store the index of drop-down menu
 
@@ -116,8 +112,8 @@ public class AddItemFragment extends Fragment {
         btnSubmit =view.findViewById(R.id.btnSubmit);
         tvInputDate = view.findViewById(R.id.tvInputDate);
         tvInputTime = view.findViewById(R.id.tvInputTime);
-        tvCategory = view.findViewById(R.id.tvInputCategory);
-        tvSelectPatient = view.findViewById(R.id.tvInputPatient);
+        tvCategory = view.findViewById(R.id.tvCategoryFilter);
+        tvSelectPatient = view.findViewById(R.id.tvPatientFilter);
         txtInputPatient = view.findViewById(R.id.txtInputPatient);
 
 //------------------------------------------------------------------
@@ -223,6 +219,25 @@ public class AddItemFragment extends Fragment {
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
                                     patientNameList.add(user.getUserName());
+
+                                    // Add Patient to the Patient drop-down menu
+                                    // Use the new dropdown_item_layout.xml for the adapter
+                                    patientAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);
+
+                                    // Specify the layout resource for dropdown items
+                                    patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+                                    tvSelectPatient.setAdapter(patientAdapter);
+
+                                    tvSelectPatient.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                            //String item = parent.getItemAtPosition(position).toString();
+                                            selectedPatientIndex = position;
+                                        /*Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + patientList.get(selectedPatientIndex).getUserName() +
+                                                "; Email: " + patientList.get(selectedPatientIndex).getUserEmail(), Toast.LENGTH_SHORT).show();*/
+
+                                        }
+                                    });
                                 }
                             } else {
                                 Toast.makeText(thisFragmentContext, "Error getting user data", Toast.LENGTH_SHORT).show();
@@ -230,24 +245,7 @@ public class AddItemFragment extends Fragment {
                         }
                     });
 
-            // Add Patient to the Patient drop-down menu
-            // Use the new dropdown_item_layout.xml for the adapter
-            memberAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);
 
-            // Specify the layout resource for dropdown items
-            memberAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-            tvSelectPatient.setAdapter(memberAdapter);
-
-            tvSelectPatient.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                    //String item = parent.getItemAtPosition(position).toString();
-                    selectedPatientIndex = position;
-                    /*Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + patientList.get(selectedPatientIndex).getUserName() +
-                            "; Email: " + patientList.get(selectedPatientIndex).getUserEmail(), Toast.LENGTH_SHORT).show();*/
-
-                }
-            });
         }
 //------------------------------------------------------------------
         // Set Date picker onClick listener

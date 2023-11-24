@@ -63,7 +63,7 @@
                 app:boxStrokeWidth="0dp">
 
                 <AutoCompleteTextView
-                    android:id="@+id/tvInputPatient"
+                    android:id="@+id/tvPatientFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"
@@ -138,7 +138,7 @@
                 app:boxStrokeWidth="0dp">
 
                 <AutoCompleteTextView
-                    android:id="@+id/tvInputCategory"
+                    android:id="@+id/tvCategoryFilter"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@android:color/transparent"

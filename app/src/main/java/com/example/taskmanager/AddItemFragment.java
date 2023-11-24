@@ -201,7 +201,7 @@ public class AddItemFragment extends Fragment {
                 tvInputTime.setOnTouchListener(null);
             }
         }
-        
+
 //------------------------------------------------------------------
         // get Patient list from Firestore
         // and set the Patient drop-down menu

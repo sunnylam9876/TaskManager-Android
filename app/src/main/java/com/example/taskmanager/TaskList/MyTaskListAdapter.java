@@ -1,6 +1,7 @@
 package com.example.taskmanager.TaskList;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -26,6 +27,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -90,9 +92,23 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
         String status = eachTask.getStatus();
         if (status.equals("Completed")) {
+            // set the text to strike through if the task is completed
             holder.ctvComplete.setChecked(true);
             holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
             holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
+
+        if (status.equals("Pending")) {
+            // set the text to red if the task is overdue
+            LocalDate currentDate = LocalDate.now();
+            LocalDate taskDate = LocalDate.of(eachTask.getYear(), eachTask.getMonth(), eachTask.getDay());
+
+            // compare the dates
+            int comparison = currentDate.compareTo(taskDate);
+            if (comparison > 0) {
+                holder.ctvComplete.setTextColor(Color.RED);
+                holder.tvTaskListDue.setTextColor(Color.RED);
+            }
         }
 
         switch(eachTask.getCategory()) {
@@ -128,6 +144,18 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     // set text style to not strike through
                     holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    if (status.equals("Pending")) {
+                        // set the text to red if the task is overdue
+                        LocalDate currentDate = LocalDate.now();
+                        LocalDate taskDate = LocalDate.of(eachTask.getYear(), eachTask.getMonth(), eachTask.getDay());
+
+                        // compare the dates
+                        int comparison = currentDate.compareTo(taskDate);
+                        if (comparison > 0) {
+                            holder.ctvComplete.setTextColor(Color.RED);
+                            holder.tvTaskListDue.setTextColor(Color.RED);
+                        }
+                    }
                     //Toast.makeText(context, "isChecked", Toast.LENGTH_LONG).show();
                 } else {
                     // if the check box is checked by user
@@ -137,6 +165,8 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     // set text style to strike through
                     holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    holder.ctvComplete.setTextColor(Color.BLACK);
+                    holder.tvTaskListDue.setTextColor(Color.BLACK);
                     //Toast.makeText(context, "not isChecked", Toast.LENGTH_LONG).show();
                 }
                 int adapterPosition = holder.getAdapterPosition();

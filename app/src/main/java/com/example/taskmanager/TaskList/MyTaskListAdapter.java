@@ -1,6 +1,7 @@
 package com.example.taskmanager.TaskList;
 
 import android.content.Context;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,27 +14,28 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.taskmanager.AddItemFragment;
-import com.example.taskmanager.ListFragment;
-import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
-import com.example.taskmanager.Utility.FragmentUtility;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.MyViewHolder> {
+
+    FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
+    CollectionReference taskCollection = firestore_db.collection("Tasks");  // tasks collection
+
     // 1 - define data sources
     private List<TaskClass> taskList;
     private Context context;
@@ -46,7 +48,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
     //2 define view holder
     public static class MyViewHolder extends RecyclerView.ViewHolder {
-        public CheckedTextView checkedTextView;
+        public CheckedTextView ctvComplete;
         public TextView tvTaskListDue;
         public ImageView ivCategory;
 
@@ -56,16 +58,12 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            checkedTextView = itemView.findViewById(R.id.checkedTextView);
+            ctvComplete = itemView.findViewById(R.id.ctvComplete);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
             ivCategory = itemView.findViewById(R.id.ivCategory);
             btnDelete = itemView.findViewById(R.id.btnDelete);
             btnViewMore = itemView.findViewById(R.id.btnViewMore);
-
-
         }
-
-
     }
 
     // 3- implementing the methods
@@ -82,13 +80,20 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
         // Assign title, due date and color for the list
         TaskClass eachTask = taskList.get(position);
-        holder.checkedTextView.setText(eachTask.getTaskTitle());
+        holder.ctvComplete.setText(eachTask.getTaskTitle());
 
         String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
         String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
 
         holder.tvTaskListDue.setText(eachTask.getMonth() + "-" + eachTask.getDay() + "-" + eachTask.getYear() + " (" +
                 hourString + ":" + minuteString + ")");
+
+        String status = eachTask.getStatus();
+        if (status.equals("Completed")) {
+            holder.ctvComplete.setChecked(true);
+            holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+            holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+        }
 
         switch(eachTask.getCategory()) {
             case "Appointment":
@@ -109,6 +114,62 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
         }
 //---------------------------------------------------------------------------------------------------------------------------------
+        // set the task to complete
+        holder.ctvComplete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChecked = holder.ctvComplete.isChecked();
+                String statusString;
+                if (isChecked) {
+                    // if the check box is unchecked by user
+                    // set the checkbox be unchecked
+                    holder.ctvComplete.setChecked(false);
+                    statusString = "Pending";
+                    // set text style to not strike through
+                    holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+                    //Toast.makeText(context, "isChecked", Toast.LENGTH_LONG).show();
+                } else {
+                    // if the check box is checked by user
+                    // mark the checkbox be checked
+                    holder.ctvComplete.setChecked(true);
+                    statusString = "Completed";
+                    // set text style to strike through
+                    holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                    //Toast.makeText(context, "not isChecked", Toast.LENGTH_LONG).show();
+                }
+                int adapterPosition = holder.getAdapterPosition();
+                if (adapterPosition != RecyclerView.NO_POSITION) {
+                    TaskClass taskToDelete = taskList.get(adapterPosition);
+
+                    // Ge the document id of the Firestore document to delete
+                    String documentId = taskToDelete.getId();
+
+
+                    Map<String, Object> updatedData = new HashMap<>();
+                    updatedData.put("status", statusString);
+
+                    // Update the document in Firestore
+                    taskCollection.document(documentId)
+                            .update(updatedData)
+                            .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Toast.makeText(context, "Task updated", Toast.LENGTH_LONG).show();
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Toast.makeText(context, "Error on updating task:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                                }
+                            });
+                }
+            }
+        });
+
+//---------------------------------------------------------------------------------------------------------------------------------
         // To delete a task
         holder.btnDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -119,8 +180,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
                     // Ge the document id of the Firestore document to delete
                     String documentId = taskToDelete.getId();
-                    FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
-                    CollectionReference taskCollection = firestore_db.collection("Tasks");  // tasks collection
+
 
                     taskCollection.document(documentId)
                             .delete()

@@ -391,7 +391,7 @@ public class AddItemFragment extends Fragment {
         inputMinute = timeString.getMinute();
         String status = "Pending";
 
-        if (isNewTask) {        // create a new task
+        if (isNewTask) {
             TaskClass newTask = new TaskClass(taskTitle, doctorId, patientName, patientEmail, patientId,
                     description, category, status, inputYear, inputMonth, inputDay, inputHour, inputMinute);
 
@@ -402,7 +402,7 @@ public class AddItemFragment extends Fragment {
                             Toast.makeText(getActivity(), "Tasked add", Toast.LENGTH_LONG).show();
                         }
                     });
-        } else {    // update existing task
+        } else {
             // Create a Map with the updated data
             Map<String, Object> updatedData = new HashMap<>();
             updatedData.put("taskTitle", taskTitle);

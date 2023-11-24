@@ -40,7 +40,7 @@
                 android:orientation="vertical">
 
                 <CheckedTextView
-                    android:id="@+id/checkedTextView"
+                    android:id="@+id/ctvComplete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="15dp"

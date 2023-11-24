@@ -1,15 +1,9 @@
 package com.example.taskmanager;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
-
-import com.example.taskmanager.TaskList.MyTaskListAdapter;
-
-
-import java.util.ArrayList;
 
 public class WholeListActivity extends AppCompatActivity {
     //set Task List
@@ -23,7 +17,7 @@ public class WholeListActivity extends AppCompatActivity {
         setContentView(R.layout.activity_whole_list);
 
         //set Task List
-        rvDashboardTaskList = findViewById(R.id.rvWholeList);
+        rvDashboardTaskList = findViewById(R.id.rvList);
         setTaskList();
 
         //------------------------------------------------------------------

@@ -47,14 +47,15 @@
                 android:textColorHint="@color/dark_grey" />
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/txtInputPatient"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginRight="16dp"
-                android:layout_marginBottom="16dp"
 
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/background_edittext"
                 android:focusable="false"
                 android:outlineProvider="none"
@@ -73,8 +74,7 @@
                     android:padding="16dp"
                     android:text=""
                     android:textColor="@color/black"
-                    android:textColorHint="@color/dark_grey"
-                    />
+                    android:textColorHint="@color/dark_grey" />
             </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -179,7 +179,7 @@
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="16dp"
                 android:layout_marginBottom="10dp"
-                android:text="Add"
+                android:text="xxx"
                 android:textSize="22sp" />
 
 

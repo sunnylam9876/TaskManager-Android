@@ -31,6 +31,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
+import java.util.Locale;
 
 public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.MyViewHolder> {
     // 1 - define data sources
@@ -82,8 +83,12 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         // Assign title, due date and color for the list
         TaskClass eachTask = taskList.get(position);
         holder.checkedTextView.setText(eachTask.getTaskTitle());
+
+        String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
+        String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
+
         holder.tvTaskListDue.setText(eachTask.getMonth() + "-" + eachTask.getDay() + "-" + eachTask.getYear() + " (" +
-                                        eachTask.getHour() + ":" + eachTask.getMinute() + ")");
+                hourString + ":" + minuteString + ")");
 
         switch(eachTask.getCategory()) {
             case "Appointment":

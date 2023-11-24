@@ -154,7 +154,7 @@ public class AddItemFragment extends Fragment {
             etInputDescription.setText(taskDetail.getDescription());
             tvSelectPatient.setText(taskDetail.getPatientName());
             tvCategory.setText(taskDetail.getCategory());
-            tvInputDate.setText(taskDetail.getDay() + "-" + taskDetail.getMonth() + "-" + taskDetail.getYear());
+            tvInputDate.setText(taskDetail.getMonth() + "-" + taskDetail.getDay() + "-" + taskDetail.getYear());
             String hourString = String.format(Locale.getDefault(), "%02d", taskDetail.getHour());
             String minuteString = String.format(Locale.getDefault(), "%02d", taskDetail.getMinute());
             tvInputTime.setText(hourString +":" + minuteString);
@@ -201,9 +201,7 @@ public class AddItemFragment extends Fragment {
                 tvInputTime.setOnTouchListener(null);
             }
         }
-
-
-
+        
 //------------------------------------------------------------------
         // get Patient list from Firestore
         // and set the Patient drop-down menu

@@ -169,8 +169,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         //writeRealTimeDb();
 
         // start Foreground service
-        //Intent serviceIntent = new Intent(requireContext(), MyForegroundService.class);
-        //thisFragmentContext.startService(serviceIntent);
+        Intent serviceIntent = new Intent(requireContext(), MyForegroundService.class);
+        thisFragmentContext.startService(serviceIntent);
 
         return view;
     }

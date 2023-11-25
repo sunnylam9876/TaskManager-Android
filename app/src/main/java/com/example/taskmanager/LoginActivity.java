@@ -104,11 +104,6 @@ public class LoginActivity extends AppCompatActivity {
                             // Handle any errors that occurred during the retrieval process
                         }
                     });
-
-
-
-
-
         }
 
         // set login button onClick listener
@@ -154,5 +149,7 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, SignupActivity.class));
             }
         });
+
+
     }
 }

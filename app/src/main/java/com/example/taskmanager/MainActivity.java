@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
 import com.example.taskmanager.Utility.FragmentUtility;
+import com.example.taskmanager.service.MyForegroundService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener{
@@ -67,6 +68,10 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
             String userEmail = intent.getStringExtra("userEmail");
             String userRole = intent.getStringExtra("userRole");
         }
+
+        // start foreground service
+        Intent serviceIntent = new Intent(this, MyForegroundService.class);
+        startService(serviceIntent);
     }
 
     @Override
@@ -81,4 +86,6 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
         fragmentTransaction.replace(R.id.frame_layout, fragment);
         fragmentTransaction.commit();
     }*/
+
+
 }

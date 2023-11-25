@@ -22,6 +22,7 @@ import android.widget.Toast;
 
 
 import com.example.taskmanager.CustomerClass.DateString;
+import com.example.taskmanager.CustomerClass.MsgClass;
 import com.example.taskmanager.CustomerClass.TimeString;
 import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.TaskClass;
@@ -90,7 +91,10 @@ public class AddItemFragment extends Fragment {
 //---------------------------------------------------------------
     EditText etInputTaskTitle, etInputDescription;
     Button  btnSubmit;
+
+
     TextView tvInputTime, tvInputDate;
+
 
     TextInputLayout txtInputPatient;
     int inputYear, inputMonth, inputDay, inputHour, inputMinute;
@@ -115,6 +119,7 @@ public class AddItemFragment extends Fragment {
         tvCategory = view.findViewById(R.id.tvCategoryFilter);
         tvSelectPatient = view.findViewById(R.id.tvPatientFilter);
         txtInputPatient = view.findViewById(R.id.txtInputPatient);
+
 
 //------------------------------------------------------------------
         //Load user name and uer id
@@ -362,7 +367,8 @@ public class AddItemFragment extends Fragment {
         });
         return view;
     }
-
+    //end of onCreateView()
+//--------------------------------------------------------------------------------------------------------------------
     private void AddData() {
         // Add data to database
         //public TaskClass(String taskTitle, String doctorId, String patientName, String patientEmail,
@@ -388,15 +394,17 @@ public class AddItemFragment extends Fragment {
         inputHour = timeString.getHour();
         inputMinute = timeString.getMinute();
         String status = "Pending";
+        boolean setAlarm = false;
 
         if (isNewTask) {        // create a new task
             TaskClass newTask = new TaskClass(taskTitle, doctorId, patientName, patientEmail, patientId,
-                    description, category, status, inputYear, inputMonth, inputDay, inputHour, inputMinute);
+                    description, category, status, inputYear, inputMonth, inputDay, inputHour, inputMinute, setAlarm);
 
             taskCollection.add(newTask)
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
+                            writeNotification("New item added", taskTitle, taskCollection.getId(), patientId);
                             Toast.makeText(getActivity(), "Tasked add", Toast.LENGTH_LONG).show();
                         }
                     });
@@ -418,6 +426,7 @@ public class AddItemFragment extends Fragment {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
+                            writeNotification("Item updated", taskTitle, documentId, patientId);
                             Toast.makeText(getActivity(), "Task updated", Toast.LENGTH_LONG).show();
                         }
                     })
@@ -437,5 +446,13 @@ public class AddItemFragment extends Fragment {
         transaction.addToBackStack(null);
         transaction.commit();
 
+    }
+
+    public void writeNotification(String title, String msg, String documentId, String patientId) {
+        // connection to Firebase Realtime database
+        FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
+        MsgClass realtimeMsg = new MsgClass(title, msg, documentId);
+        DatabaseReference myRef = realtime_db.getReference(patientId);
+        myRef.setValue(realtimeMsg);
     }
 }

@@ -9,6 +9,8 @@ public class TaskClass implements Parcelable {
     String id, taskTitle, doctorId, patientName, patientEmail, patientId;
     String description, category, status;
 
+    boolean setAlarm;
+
     int year, month, day, hour, minute;
 
 
@@ -18,7 +20,7 @@ public class TaskClass implements Parcelable {
 
     public TaskClass(String taskTitle, String doctorId, String patientName, String patientEmail,
                      String patientId, String description, String category, String status,
-                     int year, int month, int day, int hour, int minute) {
+                     int year, int month, int day, int hour, int minute, boolean setAlarm) {
 
         this.taskTitle = taskTitle;
         this.doctorId = doctorId;
@@ -33,6 +35,15 @@ public class TaskClass implements Parcelable {
         this.day = day;
         this.hour = hour;
         this.minute = minute;
+        this.setAlarm = setAlarm;
+    }
+
+    public boolean isSetAlarm() {
+        return setAlarm;
+    }
+
+    public void setSetAlarm(boolean setAlarm) {
+        this.setAlarm = setAlarm;
     }
 
     public String getId() {

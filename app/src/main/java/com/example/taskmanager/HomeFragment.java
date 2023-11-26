@@ -19,23 +19,30 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.InputType;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.DateClass;
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
 import com.example.taskmanager.CustomerClass.MsgClass;
+import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
 import com.example.taskmanager.TaskList.TaskCategoryClass;
 import com.example.taskmanager.TaskList.TaskClass;
+import com.example.taskmanager.Utility.CalculateDate;
 import com.example.taskmanager.service.MyForegroundService;
 import com.example.taskmanager.service.MyNotificationReceiver;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
@@ -62,8 +69,10 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private TextView tvUserName;
 
 //------------------------------------------------------------------
-    // for calendar recycler view
+    // for calendar
     private TextView tvMonthYear, tvFwd, tvBwd;     // TextView for choosing the month of calendar
+
+    private TextView tvPendingTaskTitle;
     private RecyclerView rvCalendar;
     private RecyclerView.LayoutManager calendarLayoutManager;
     private RecyclerView.Adapter calendarAdapter;
@@ -79,6 +88,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     private RecyclerView.LayoutManager taskListLayoutManager;
     private RecyclerView.Adapter taskListAdapter;
     private ArrayList<TaskClass> taskList;
+    private ArrayList<TaskClass> originalTaskList;
     ArrayList<TaskCategoryClass> taskInDay;
 //    private ArrayList<TaskCategoryClass> taskInDay;
     int[] appointment = new int[32];
@@ -86,7 +96,18 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     int[] workout = new int[32];
     int[] others = new int[32];
 
-//---------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
+    // Setup Patient drop-down menu
+    ArrayList<UserClass> patientList = new ArrayList<>();  // to store patient list get from Firestore db
+    ArrayList<String> patientNameList = new ArrayList<>();  // to store patient name
+    ArrayAdapter<String> patientAdapter;
+    String selectedPatient = "All";
+    int selectedPatientIndex;
+    String selectedPatientId;
+    AutoCompleteTextView tvHomePatientFilter;
+    boolean selectable = false;      // indicate whether the Patient drop-down menu is selectable or not
+//--------------------------------------------------------------------------------------------------------------------
+
     // connection to Firebase Realtime database
     //FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
 
@@ -109,6 +130,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
         taskList = new ArrayList<>();
+        originalTaskList = new ArrayList<>();
         taskInDay = new ArrayList<>();
 
 
@@ -127,14 +149,84 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             userRole = bundle.getString("userRole");
 
             tvUserName.setText(userName + " (" + userRole +")");
+            if (userRole.equals("Doctor"))
+                selectable = true;
         }
 
-        //------------------------------------------------------------------
+
+//--------------------------------------------------------------------------------------------------------------------
+        // get Patient list from Firestore
+        // and set the Patient drop-down menu
+        tvHomePatientFilter = view.findViewById(R.id.tvHomePatientFilter);
+        TextInputLayout txtHomeInputPatient = view.findViewById(R.id.txtHomeInputPatient);
+
+        if (!selectable) {
+            // if the user is a patient, show the user's name disable the drop-down menu
+            // set it to invisible and remove it from the layout so that it will not occupy space
+            // if use setVisibility(View.INVISIBLE), it will still occupy space
+            tvHomePatientFilter.setVisibility(View.GONE);
+            txtHomeInputPatient.setVisibility(View.GONE);
+            tvHomePatientFilter.setText(userName);
+            tvHomePatientFilter.setFocusable(false);
+            tvHomePatientFilter.setFocusableInTouchMode(false);
+            tvHomePatientFilter.setInputType(InputType.TYPE_NULL);
+            tvHomePatientFilter.setOnClickListener(null);
+            tvHomePatientFilter.setOnTouchListener(null);
+        }
+        else {
+            // if the user is a doctor, enable the patient drop-down menu
+            userCollection
+                    .whereEqualTo("userRole", "Patient")
+                    .get()
+                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                            if (task.isSuccessful()) {
+                                patientNameList.add("All");
+                                for (QueryDocumentSnapshot document : task.getResult()) {
+                                    UserClass user = document.toObject(UserClass.class);
+                                    patientList.add(user);
+                                    patientNameList.add(user.getUserName());
+                                    // Add Patient to the Patient drop-down menu
+                                    // Use the new dropdown_item_layout.xml for the adapter
+                                    patientAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);
+
+                                    // Specify the layout resource for dropdown items
+                                    patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
+                                    tvHomePatientFilter.setAdapter(patientAdapter);
+                                    tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
 
 
+                                    tvHomePatientFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                        @Override
+                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                            selectedPatient = parent.getItemAtPosition(position).toString();
+                                            selectedPatientIndex = position - 1;
+                                            Toast.makeText(thisFragmentContext, selectedPatient + ":" + selectedPatientIndex, Toast.LENGTH_SHORT).show();
+                                            LoadDataFromDB();
+                                            //filterTask(selectedPatient, selectedCategory);
+                                            //setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
+                                            /*selectedPatientIndex = position - 1;
+                                            if (selectedPatientIndex == -1)
+                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
+                                            if (selectedPatientIndex >= 0)
+                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + patientList.get(selectedPatientIndex).getUserName() +
+                                                        "; Email: " + patientList.get(selectedPatientIndex).getUserEmail(), Toast.LENGTH_SHORT).show();*/
+                                        }
+                                    });
+                                }
+                            } else {
+                                Toast.makeText(thisFragmentContext, "Error getting user data", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+        }
+//--------------------------------------------------------------------------------------------------------------------
         //set calendar
         rvCalendar = view.findViewById(R.id.rvCalendar);
         tvMonthYear = view.findViewById(R.id.tvMonthYear);
+        tvPendingTaskTitle = view.findViewById(R.id.tvPendingTaskTitle);
+
         selectedDate = LocalDate.now();
         //setMonthView();
 
@@ -179,7 +271,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     // set the recycler view to display the calendar
     private void setMonthView() {
 
-
         //define sources
         daysInMonth = daysInMonthArray(selectedDate);
         dateClass = new DateClass(yearFromDate(selectedDate), monthFromDate(selectedDate), daysInMonth);
@@ -194,6 +285,10 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         rvCalendar.setAdapter(calendarAdapter);
         calendarAdapter.notifyDataSetChanged();
         ((MyCalendarAdapter) calendarAdapter).setOnItemClickListener(this);
+
+        tvPendingTaskTitle.setText("Pending task on: " + CalculateDate.monthFromDate(selectedDate) + "-"
+                + CalculateDate.dayFromDate(selectedDate) + "-"
+                + CalculateDate.yearFromDate(selectedDate));
     }
 
     // get the days in a month and convert them to an array
@@ -259,6 +354,9 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     public void onItemClick(String day) {
         //Toast.makeText(thisFragmentContext, "Selected Day: " + day + " " + monthFromDate(selectedDate) + " " + yearFromDate(selectedDate), Toast.LENGTH_SHORT).show();
         setTaskList(Integer.parseInt(day));
+        tvPendingTaskTitle.setText("Pending task on: " + CalculateDate.monthFromDate(selectedDate) + "-"
+                                                        + day + "-"
+                                                        + CalculateDate.yearFromDate(selectedDate));
 
         // save the information to intent
 /*        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
@@ -302,25 +400,59 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         int year = selectedDate.getYear();
         int month = selectedDate.getMonthValue();
         int day = selectedDate.getDayOfMonth();
-        String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
+        //String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
+        String patientId = userId;
         //String status = "Pending";
 
 
         // Clear the lists first
         taskList.clear();
+        originalTaskList.clear();
         taskInDay.clear();
+        Query query;
 
-        Query query = taskCollection
-                .whereEqualTo("year", year)
-                .whereEqualTo("month", month)
-                //.whereEqualTo("day", day)
-                .whereEqualTo("patientId", patientId)
-                //.whereEqualTo("status", status)
-                .orderBy("day", Query.Direction.ASCENDING)      // need to create index in Firestore first, or click the link in the error msg
-                .orderBy("hour", Query.Direction.ASCENDING)
-                .orderBy("minute", Query.Direction.ASCENDING);
+        if (userRole.equals("Doctor")) {    //doctor can see all the data
+            // need to create index in Firestore first, click the link in the error msg
+            if (selectedPatient.equals("All")) {
+                query = taskCollection
+                        .whereEqualTo("year", year)
+                        .whereEqualTo("month", month)
+                        //.whereEqualTo("day", day)
+                        //.whereEqualTo("patientId", patientId)
+                        //.whereEqualTo("status", status)
+                        .orderBy("day", Query.Direction.ASCENDING)
+                        .orderBy("hour", Query.Direction.ASCENDING)
+                        .orderBy("minute", Query.Direction.ASCENDING);
                 //.orderBy("day");
                 //.whereEqualTo("category", category);
+            } else {
+                query = taskCollection
+                        .whereEqualTo("year", year)
+                        .whereEqualTo("month", month)
+                        //.whereEqualTo("day", day)
+                        .whereEqualTo("patientId", patientList.get(selectedPatientIndex).getUserId())
+                        //.whereEqualTo("status", status)
+                        .orderBy("day", Query.Direction.ASCENDING)
+                        .orderBy("hour", Query.Direction.ASCENDING)
+                        .orderBy("minute", Query.Direction.ASCENDING);
+                //.orderBy("day");
+                //.whereEqualTo("category", category);
+            }
+
+        } else {    // patient only view their own data
+            // need to create index in Firestore first, click the link in the error msg
+            query = taskCollection
+                    .whereEqualTo("year", year)
+                    .whereEqualTo("month", month)
+                    //.whereEqualTo("day", day)
+                    .whereEqualTo("patientId", patientId)
+                    //.whereEqualTo("status", status)
+                    .orderBy("day", Query.Direction.ASCENDING)
+                    .orderBy("hour", Query.Direction.ASCENDING)
+                    .orderBy("minute", Query.Direction.ASCENDING);
+            //.orderBy("day");
+            //.whereEqualTo("category", category);
+        }
 
         // Execute the query to get the matching documents
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -330,10 +462,15 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         TaskClass eachTask = document.toObject(TaskClass.class);
                         eachTask.setId(document.getId());       // To get document id for further update or delete
+                        //originalTaskList.add(eachTask);
                         taskList.add(eachTask);
                     }
 
-                    // Initialize the Category arrays
+                    // TODO: filtered task to taskList
+                    //handleSelectPatient();
+                    LoadDataToCalendar(day);
+
+                    /*// Initialize the Category arrays
                     for (int i = 0; i <= 31; i++) {
                         appointment[i] = 0;
                         medicine[i] = 0;
@@ -359,7 +496,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                     setMonthView();
 
                     // Set the task list that under the calendar
-                    setTaskList(day);
+                    setTaskList(day);*/
 
                 } else {
                     // Display the error
@@ -370,7 +507,57 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         });
 
     } // end of LoadDataFromDB()
+
 //------------------------------------------------------------------
+    private void LoadDataToCalendar(int selectedDay) {
+        // Initialize the Category arrays
+        for (int i = 0; i <= 31; i++) {
+            appointment[i] = 0;
+            medicine[i] = 0;
+            workout[i] = 0;
+            others[i] = 0;
+        }
+
+        // Loop through the downloaded data and count the number of category for each day
+        for (int i = 0; i < taskList.size(); i++) {
+            int day = taskList.get(i).getDay();
+            String status = taskList.get(i).getCategory();
+            if (status.equals("Appointment"))
+                appointment[day]++;
+            if (status.equals("Medicine"))
+                medicine[day]++;
+            if (status.equals("Workout"))
+                workout[day]++;
+            if (status.equals("Others"))
+                others[day]++;
+        }
+
+        // Set the calendar
+        setMonthView();
+
+        // Set the task list that under the calendar
+        setTaskList(selectedDay);
+    }
+//------------------------------------------------------------------
+
+    private void handleSelectPatient() {
+        // filtered task to taskList
+        if (selectable) {   // Doctor:
+            for (TaskClass eachTask : originalTaskList) {
+                if (selectedPatient.equals("All")) {
+                    taskList.clear();
+                    taskList.addAll(originalTaskList);
+                }
+                if (eachTask.getPatientName().equals(selectedPatient)) {
+                    taskList.add(eachTask);
+                }
+            }
+
+        } else {    // Patient:
+            taskList.clear();
+            taskList.addAll(originalTaskList);
+        }
+    }
     private void createNotificationChannel() {
         // Create the NotificationChannel, but only on API 26+ because
         // the NotificationChannel class is not in the Support Library.

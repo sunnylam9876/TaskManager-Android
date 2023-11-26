@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.Toast;
 
@@ -19,10 +20,10 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener{
 
-    // for view binding
-    //ActivityMainBinding binding;
-
     BottomNavigationView bottomNavigationView;
+
+    String userId, userName, userEmail, userRole;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,18 +61,34 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
             return true;
         });
 
-        // for testing
+        // get user information
         Intent intent = getIntent();
         if (intent != null) {
-            String userId = intent.getStringExtra("userId");
-            String userName = intent.getStringExtra("userName");
-            String userEmail = intent.getStringExtra("userEmail");
-            String userRole = intent.getStringExtra("userRole");
+            userId = intent.getStringExtra("userId");
+            //userName = intent.getStringExtra("userName");
+            //userEmail = intent.getStringExtra("userEmail");
+            userRole = intent.getStringExtra("userRole");
         }
 
-        // start foreground service
-        Intent serviceIntent = new Intent(this, MyForegroundService.class);
-        startService(serviceIntent);
+        if (userRole.equals("Patient")) {
+            // start foreground service if the user is patient
+            // no need to start foreground service for doctor
+            // pass data to foreground service using bundle
+            Bundle bundle = new Bundle();
+            bundle.putString("userId", userId);
+            bundle.putString("userRole", userRole);
+            Intent serviceIntent = new Intent(this, MyForegroundService.class);
+            serviceIntent.putExtras(bundle);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Start foreground service for Android 8.0 and higher
+                startForegroundService(serviceIntent);
+            } else {
+                // Start foreground service for Android versions lower than 8.0
+                startService(serviceIntent);
+            }
+            //startService(serviceIntent);
+        }
     }
 
     @Override

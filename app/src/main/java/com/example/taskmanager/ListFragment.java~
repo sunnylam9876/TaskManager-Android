@@ -174,7 +174,7 @@ public class ListFragment extends Fragment {
         // Specify the layout resource for dropdown items
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
         tvCategoryFilter.setAdapter(categoryAdapter);
-
+        tvCategoryFilter.setAdapter(patientAdapter);
         tvCategoryFilter.setText(categoryAdapter.getItem(0), false);
         tvCategoryFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override

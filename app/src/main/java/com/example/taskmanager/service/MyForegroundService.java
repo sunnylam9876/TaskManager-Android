@@ -9,6 +9,7 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -35,6 +36,8 @@ public class MyForegroundService extends Service {
     private boolean isServiceStarted = false;
     private boolean isFirstLoad = true;
 
+    private String userId, userRole;
+
         public MyForegroundService() {
     }
 
@@ -46,6 +49,13 @@ public class MyForegroundService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //Log.d("MyService", "onStartCommand called, Intent: " + intent + ", Flags: " + flags + ", StartId: " + startId);
+        // get the user information from MainActivity
+        if (intent != null && intent.getExtras() != null) {
+            Bundle receivedBundle = intent.getExtras();
+            userId = receivedBundle.getString("userId");
+            userRole = receivedBundle.getString("userRole");
+        }
+
 
         if (!isServiceStarted) {
             // Create a notification for the foreground service
@@ -59,8 +69,9 @@ public class MyForegroundService extends Service {
 
             // connection to Firebase Realtime database
             FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = realtime_db.getReference("wmDAr2fnh0RVouy0hwlAtCFoaCs2");
+            DatabaseReference myRef = realtime_db.getReference(userId);
 
+            // set realtime database event listener
             myRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -71,6 +82,7 @@ public class MyForegroundService extends Service {
                         //tvMsg.setText(newValue.getTitle() + "; " + newValue.getMsg() + "; Id: " + newValue.getDocumentId());
                         showNotification(newValue.getTitle(), newValue.getMsg());
                     }
+
                 }
 
                 @Override
@@ -79,8 +91,6 @@ public class MyForegroundService extends Service {
                 }
             });
         }
-
-
         return START_STICKY; // Service will be restarted if it's killed by the system
     }
 
@@ -96,6 +106,16 @@ public class MyForegroundService extends Service {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
+        // Create a notification channel (for Android 8.0 and higher)
+        //String channelId = "my_notification_channel";
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence channelName = "My Notification Channel";
+            int importance = NotificationManager.IMPORTANCE_LOW;
+            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, channelName, importance);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(notificationChannel);
+        }
+
         NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context, CHANNEL_ID)
                         .setSmallIcon(R.drawable.baseline_access_alarm_24)
@@ -110,8 +130,9 @@ public class MyForegroundService extends Service {
                 NotificationManagerCompat.from(context);
 
         // notificationId is a unique int for each notification that you must define.
-        int notificationId = 1;
-        notificationManager.notify(notificationId, builder.build());
+        // Generate a unique notification ID (e.g., using a timestamp)
+        long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
+        notificationManager.notify((int) notificationId, builder.build());
 
         //Toast.makeText(context, "Notification sent from buildNotification!", Toast.LENGTH_LONG).show();
 
@@ -144,8 +165,10 @@ public class MyForegroundService extends Service {
 
         // Show the notification
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-        int notificationId = 123; // Unique ID for the notification
-        notificationManager.notify(notificationId, builder.build());
+
+        // Generate a unique notification ID (e.g., using a timestamp)
+        long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
+        notificationManager.notify((int) notificationId, builder.build());
     }
 
 

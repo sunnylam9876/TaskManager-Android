@@ -5,6 +5,7 @@ import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -163,7 +164,8 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
                     cellDayText.setBackgroundColor(color);
                     cellDayText = cellDayText; // Update the currently selected TextView*/
 
-                    if (onItemClickListener != null) {
+                    // call the onItemClick method in HomeFragment.java
+                    if (onItemClickListener != null && !cellDayText.getText().equals("")) {
                         onItemClickListener.onItemClick(cellDayText.getText().toString());
                     }
                 }

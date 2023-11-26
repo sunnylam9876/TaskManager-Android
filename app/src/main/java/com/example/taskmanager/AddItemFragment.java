@@ -61,7 +61,7 @@ public class AddItemFragment extends Fragment {
     FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
 
     // get a reference to a specific node in the db
-    DatabaseReference myRef = realtime_db.getReference("message");
+    //DatabaseReference myRef = realtime_db.getReference("message");
 
     // connection to Firebase Firestore database
     private FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
@@ -117,7 +117,7 @@ public class AddItemFragment extends Fragment {
         tvInputDate = view.findViewById(R.id.tvInputDate);
         tvInputTime = view.findViewById(R.id.tvInputTime);
         tvCategory = view.findViewById(R.id.tvCategoryFilter);
-        tvSelectPatient = view.findViewById(R.id.tvPatientFilter);
+        tvSelectPatient = view.findViewById(R.id.tvHomePatientFilter);
         txtInputPatient = view.findViewById(R.id.txtInputPatient);
 
 
@@ -133,7 +133,49 @@ public class AddItemFragment extends Fragment {
             //userName = bundle.getString("userName");
             //userEmail = bundle.getString("userEmail");
             userRole = bundle.getString("userRole");
+            if (userRole.equals("Patient"))
+                isUpdate = false;
+            else
+                isUpdate = true;
+        }
 
+        if (isUpdate == false) {    // Read only mode (i.e. Patient)
+            //if (userRole.equals("Patient")) {
+            // disable the submit button
+            btnSubmit.setEnabled(false);
+
+
+            // set all EditText to read only
+            etInputTaskTitle.setFocusable(false);
+            etInputTaskTitle.setFocusableInTouchMode(false);
+            etInputDescription.setFocusable(false);
+            etInputDescription.setFocusableInTouchMode(false);
+
+            tvSelectPatient.setFocusable(false);
+            tvSelectPatient.setFocusableInTouchMode(false);
+            tvSelectPatient.setInputType(InputType.TYPE_NULL);
+            tvSelectPatient.setOnClickListener(null);
+            tvSelectPatient.setOnTouchListener(null);
+                /*txtInputPatient.setFocusable(false);
+                txtInputPatient.setFocusableInTouchMode(false);
+                txtInputPatient.setOnClickListener(null);
+                txtInputPatient.setOnTouchListener(null);*/
+
+            tvCategory.setFocusable(false);
+            tvCategory.setFocusableInTouchMode(false);
+            tvCategory.setInputType(InputType.TYPE_NULL);
+            tvCategory.setOnClickListener(null);
+            tvCategory.setOnTouchListener(null);
+
+            tvInputDate.setFocusable(false);
+            tvInputDate.setFocusableInTouchMode(false);
+            tvInputDate.setOnClickListener(null);
+            tvInputDate.setOnTouchListener(null);
+
+            tvInputTime.setFocusable(false);
+            tvInputTime.setFocusableInTouchMode(false);
+            tvInputTime.setOnClickListener(null);
+            tvInputTime.setOnTouchListener(null);
         }
 
         // Load data transferred from Home Fragment
@@ -148,13 +190,8 @@ public class AddItemFragment extends Fragment {
 
             isNewTask = false;
             btnSubmit.setText("Update");
-            if (userRole.equals("Patient"))
-                isUpdate = false;
-            else
-                isUpdate = true;
 
-            //for testing only
-            //tvHeading.setText("update: " + update + "; title: " + taskDetail.getTaskTitle());
+
             etInputTaskTitle.setText(taskDetail.getTaskTitle());
             etInputDescription.setText(taskDetail.getDescription());
             tvSelectPatient.setText(taskDetail.getPatientName());
@@ -167,44 +204,7 @@ public class AddItemFragment extends Fragment {
             //tvInputDate = view.findViewById(R.id.tvInputDate);
             //tvInputTime = view.findViewById(R.id.tvInputTime);
 
-            if (isUpdate == false) {    // Read only mode (i.e. Patient)
-            //if (userRole.equals("Patient")) {
-                // disable the submit button
-                btnSubmit.setEnabled(false);
 
-
-                // set all EditText to read only
-                etInputTaskTitle.setFocusable(false);
-                etInputTaskTitle.setFocusableInTouchMode(false);
-                etInputDescription.setFocusable(false);
-                etInputDescription.setFocusableInTouchMode(false);
-
-                tvSelectPatient.setFocusable(false);
-                tvSelectPatient.setFocusableInTouchMode(false);
-                tvSelectPatient.setInputType(InputType.TYPE_NULL);
-                tvSelectPatient.setOnClickListener(null);
-                tvSelectPatient.setOnTouchListener(null);
-                /*txtInputPatient.setFocusable(false);
-                txtInputPatient.setFocusableInTouchMode(false);
-                txtInputPatient.setOnClickListener(null);
-                txtInputPatient.setOnTouchListener(null);*/
-
-                tvCategory.setFocusable(false);
-                tvCategory.setFocusableInTouchMode(false);
-                tvCategory.setInputType(InputType.TYPE_NULL);
-                tvCategory.setOnClickListener(null);
-                tvCategory.setOnTouchListener(null);
-
-                tvInputDate.setFocusable(false);
-                tvInputDate.setFocusableInTouchMode(false);
-                tvInputDate.setOnClickListener(null);
-                tvInputDate.setOnTouchListener(null);
-
-                tvInputTime.setFocusable(false);
-                tvInputTime.setFocusableInTouchMode(false);
-                tvInputTime.setOnClickListener(null);
-                tvInputTime.setOnTouchListener(null);
-            }
         }
 
 //------------------------------------------------------------------

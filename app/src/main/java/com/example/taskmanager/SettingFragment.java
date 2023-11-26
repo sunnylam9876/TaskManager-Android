@@ -39,7 +39,7 @@ public class SettingFragment extends Fragment {
     Context thisFragmentContext;
     Button btnSignout;
 
-    TextView tvMsg;
+    //TextView tvMsg;
 
     // Initialize Firebase Authentication
     FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -52,7 +52,7 @@ public class SettingFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
         btnSignout = view.findViewById(R.id.btnSignout);
 
-        tvMsg = view.findViewById(R.id.tvMsg);
+        //tvMsg = view.findViewById(R.id.tvMsg);
 
         btnSignout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -121,28 +121,6 @@ public class SettingFragment extends Fragment {
         notificationManager.notify(notificationId, builder.build());
 
         Toast.makeText(context, "Notification sent from SettingFragment!", Toast.LENGTH_LONG).show();
-    }
-
-    public void readRealTimeDb() {
-        // connection to Firebase Realtime database
-        FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = realtime_db.getReference("wmDAr2fnh0RVouy0hwlAtCFoaCs2");
-
-
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                MsgClass newValue = snapshot.getValue(MsgClass.class);
-                tvMsg.setText(newValue.getTitle() + "; " + newValue.getMsg() + "; Id: " + newValue.getDocumentId());
-                //sendNotification(requireContext(), newValue.getTitle(), newValue.getMsg());
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-        //myRef.setValue("Test msg");
     }
 
 

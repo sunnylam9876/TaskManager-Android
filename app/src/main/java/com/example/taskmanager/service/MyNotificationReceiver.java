@@ -1,6 +1,7 @@
 package com.example.taskmanager.service;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -24,14 +25,16 @@ public class MyNotificationReceiver extends BroadcastReceiver {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_IMMUTABLE);
 
-        int notificationId = intent.getIntExtra("notification_id", 1);
+        int notificationId = intent.getIntExtra("notification_id", 4000);
+        String msg = intent.getStringExtra("msg");
 
         // Create and show the notification
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.baseline_access_alarm_24)
-                .setContentTitle("Notification Title")
-                .setContentText("Notification Text")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setContentTitle("Reminder: You have an activity now")
+                .setContentText(msg)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setDefaults(Notification.DEFAULT_ALL) // Add default notification sound, vibration, etc.
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent);
 

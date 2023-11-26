@@ -419,6 +419,7 @@ public class AddItemFragment extends Fragment {
             updatedData.put("day", inputDay);
             updatedData.put("hour", inputHour);
             updatedData.put("minute", inputMinute);
+            updatedData.put("setAlarm", false);
 
             // Update the document in Firestore
             taskCollection.document(documentId)
@@ -451,7 +452,8 @@ public class AddItemFragment extends Fragment {
     public void writeNotification(String title, String msg, String documentId, String patientId) {
         // connection to Firebase Realtime database
         FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
-        MsgClass realtimeMsg = new MsgClass(title, msg, documentId);
+        long timeStamp = System.currentTimeMillis(); // Use a timestamp as a unique ID
+        MsgClass realtimeMsg = new MsgClass(title, msg, documentId, timeStamp);
         DatabaseReference myRef = realtime_db.getReference(patientId);
         myRef.setValue(realtimeMsg);
     }

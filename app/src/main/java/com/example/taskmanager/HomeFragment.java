@@ -43,6 +43,8 @@ import com.example.taskmanager.Utility.CalculateDate;
 import com.example.taskmanager.service.MyForegroundService;
 import com.example.taskmanager.service.MyNotificationReceiver;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.database.DatabaseReference;
@@ -59,6 +61,8 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemClickListener {
@@ -492,37 +496,12 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                         taskList.add(eachTask);
                     }
 
-                    // TODO: filtered task to taskList
-                    //handleSelectPatient();
                     LoadDataToCalendar(day);
 
-                    /*// Initialize the Category arrays
-                    for (int i = 0; i <= 31; i++) {
-                        appointment[i] = 0;
-                        medicine[i] = 0;
-                        workout[i] = 0;
-                        others[i] = 0;
+                    //create alarm
+                    if (userRole.equals("Patient")) {
+                        scheduleAlarm();
                     }
-
-                    // Loop through the downloaded data and count the number of category for each day
-                    for (int i = 0; i < taskList.size(); i++) {
-                        int day = taskList.get(i).getDay();
-                        String status = taskList.get(i).getCategory();
-                        if (status.equals("Appointment"))
-                            appointment[day]++;
-                        if (status.equals("Medicine"))
-                            medicine[day]++;
-                        if (status.equals("Workout"))
-                            workout[day]++;
-                        if (status.equals("Others"))
-                            others[day]++;
-                    }
-
-                    // Set the calendar
-                    setMonthView();
-
-                    // Set the task list that under the calendar
-                    setTaskList(day);*/
 
                 } else {
                     // Display the error
@@ -602,27 +581,61 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         }
     }
 
-    private void scheduleNotification() {
-        AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(requireContext(), MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
-        intent.putExtra("notification_id", 1); // Use a unique ID for each notification
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+    private void scheduleAlarm() {
+        // loop through the taskList to see if alarm was set for each task
+        for (TaskClass eachTask : taskList) {
+            if (eachTask.isSetAlarm() == false) {       //check if alarm was set for the task. If no, set alarm
+                AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
+                Intent intent = new Intent(requireContext(), MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
+                long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
+                intent.putExtra("msg", eachTask.getTaskTitle());
+                intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        // Set the desired time for the notification (replace with your desired time logic)
-        calendar.set(Calendar.HOUR_OF_DAY, 1);      // Replace with the desired hour
-        calendar.set(Calendar.MINUTE, 55);          // Replace with the desired minute
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTimeInMillis(System.currentTimeMillis());
 
-        // Schedule the notification
-        if (alarmManager != null) {
-            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-            //Toast.makeText(thisFragmentContext, "notification scheduled", Toast.LENGTH_SHORT).show();
+                // Set the desired time for the notification (replace with your desired time logic)
+                calendar.set(Calendar.YEAR, eachTask.getYear());
+                calendar.set(Calendar.MONTH, eachTask.getMonth() - 1);  //Note: Months are zero-based (0 for January, 1 for February, etc.)
+                calendar.set(Calendar.DAY_OF_MONTH, eachTask.getDay());
+                calendar.set(Calendar.HOUR_OF_DAY, eachTask.getHour());
+                calendar.set(Calendar.MINUTE, eachTask.getMinute());
+                calendar.set(Calendar.SECOND, 0);
+                calendar.set(Calendar.MILLISECOND, 0);
+
+                // Schedule alarm
+                if (alarmManager != null) {
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    //Toast.makeText(thisFragmentContext, "notification scheduled", Toast.LENGTH_SHORT).show();
+                }
+
+                //update the field in database
+                eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task
+                Map<String, Object> updatedData = new HashMap<>();
+                updatedData.put("setAlarm", true);
+                taskCollection.document(eachTask.getId())
+                        .update(updatedData)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Toast.makeText(getActivity(), "Alarm set", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Toast.makeText(getActivity(), "Error on updating task:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                            }
+                        });
+            }
         }
+
+
     }
+
+
 
 
 

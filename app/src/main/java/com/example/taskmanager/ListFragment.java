@@ -1,6 +1,9 @@
 package com.example.taskmanager;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -79,7 +82,32 @@ public class ListFragment extends Fragment {
     ArrayAdapter<String> categoryAdapter;
     String selectedCategory = "All";
 //--------------------------------------------------------------------------------------------------------------------
+    // this part is to receive message from the foreground service
+    // once receive foreground service call, LoadDataFromDB() will be triggered to update data
+    private BroadcastReceiver dataUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction() != null && intent.getAction().equals("LOAD_DATA_FROM_DB")) {
+                // Call your function when the broadcast is received
+                LoadDataFromDB();
+            }
+        }
+    };
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter("LOAD_DATA_FROM_DB");
+        requireContext().registerReceiver(dataUpdateReceiver, filter);
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        requireContext().unregisterReceiver(dataUpdateReceiver);
+    }
+
+//--------------------------------------------------------------------------------------------------------------------
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

@@ -121,8 +121,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     // for notification
     private static final String CHANNEL_ID = "task4175";
 //------------------------------------------------------------------
-    // this part is to receive message from the foreground service
-    // once receive foreground service call, LoadDataFromDB() will be triggered to update data
+
     private BroadcastReceiver dataUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {

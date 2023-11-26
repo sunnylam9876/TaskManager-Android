@@ -257,7 +257,7 @@ public class AddItemFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     long defaultDateInMillis;
-                    if (isUpdate == true) {     // get the original date before updating task
+                    if (isUpdate && !isNewTask) {     // get the original date before updating task
                         Calendar calendar = Calendar.getInstance();
                         calendar.set(Calendar.YEAR, taskDetail.getYear());
                         calendar.set(Calendar.MONTH, taskDetail.getMonth() - 1);    //Note: Months are zero-based (0 for January, 1 for February, etc.)
@@ -304,7 +304,7 @@ public class AddItemFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     int hour, minute;
-                    if (isUpdate == true) {
+                    if (isUpdate && !isNewTask) {
                         hour = taskDetail.getHour();
                         minute = taskDetail.getMinute();
                     } else {

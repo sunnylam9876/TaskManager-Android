@@ -62,7 +62,7 @@ public class MyForegroundService extends Service {
 
         if (!isServiceStarted) {
             // Create a notification for the foreground service
-            Notification notification = buildNotification(this, "App is running", "");
+            Notification notification = buildNotification(this, "Task Management App is running", "");
 
             // Start the service in the foreground with the notification
             startForeground(SERVICE_NOTIFICATION_ID, notification);
@@ -114,13 +114,15 @@ public class MyForegroundService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         // Create a notification channel (for Android 8.0 and higher)
-        //String channelId = "my_notification_channel";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             CharSequence channelName = "Foreground Service";
             int importance = NotificationManager.IMPORTANCE_LOW;
             NotificationChannel notificationChannel = new NotificationChannel(SERVICE_CHANNEL_ID, channelName, importance);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
+            // Check if the channel already exists. If no, create a new channel
+            if (notificationManager.getNotificationChannel(SERVICE_CHANNEL_ID) == null) {
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
         }
 
         NotificationCompat.Builder builder =
@@ -146,40 +148,8 @@ public class MyForegroundService extends Service {
         return builder.build();
     }
 
-    // this notification is to alert user if there is any update on database
-    @SuppressLint("MissingPermission")
-    private void showNotification(String title, String msg) {
-        // Create an intent to open your app when the notification is tapped
-        Intent intent = new Intent(this, LoginActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
-        // Create a notification channel (for Android 8.0 and higher)
-        //String channelId = "my_notification_channel";
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = "My Notification Channel";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, channelName, importance);
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
-        }
-
-        // Build the notification
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setSmallIcon(R.drawable.baseline_access_alarm_24)
-                .setContentTitle(title)
-                .setContentText(msg)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        // Show the notification
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        // Generate a unique notification ID (e.g., using a timestamp)
-        long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
-        notificationManager.notify((int) notificationId, builder.build());
-    }
-
-    // show floating notification
+    // show floating notification whenever there is update from realtime database
     @SuppressLint("MissingPermission")
     private void showFloatingNotification(String title, String msg) {
         // Create an intent to open your app when the notification is tapped
@@ -192,7 +162,10 @@ public class MyForegroundService extends Service {
             int importance = NotificationManager.IMPORTANCE_HIGH; // Use HIGH importance for floating notifications
             NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, channelName, importance);
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(notificationChannel);
+            // Check if the channel already exists. If no, create the channel
+            if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
+                notificationManager.createNotificationChannel(notificationChannel);
+            }
         }
 
         // Build the notification with additional properties for heads-up notification
@@ -212,8 +185,6 @@ public class MyForegroundService extends Service {
         long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
         notificationManager.notify((int) notificationId, builder.build());
     }
-
-
 
     @Override
     public void onDestroy() {

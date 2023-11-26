@@ -2,15 +2,17 @@ package com.example.taskmanager.CustomerClass;
 
 public class MsgClass {
     String title, msg, documentId;
+    long timeStamp;
 
     public MsgClass() {
         // empty constructor for Firebase
     }
 
-    public MsgClass(String title, String msg, String documentId) {
+    public MsgClass(String title, String msg, String documentId, long timeStamp) {
         this.title = title;
         this.msg = msg;
         this.documentId = documentId;
+        this.timeStamp = timeStamp;
     }
 
     public String getTitle() {
@@ -35,5 +37,13 @@ public class MsgClass {
 
     public void setDocumentId(String documentId) {
         this.documentId = documentId;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }

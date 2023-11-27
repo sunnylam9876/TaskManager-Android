@@ -1,6 +1,8 @@
 package com.example.taskmanager;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -92,11 +94,9 @@ public class AddItemFragment extends Fragment {
 
 //---------------------------------------------------------------
     EditText etInputTaskTitle, etInputDescription;
-    Button  btnSubmit;
+    Button  btnSubmit, btnDelete;
 
     TextView tvInputTime, tvInputDate;
-
-
     TextInputLayout txtInputPatient;
     int inputYear, inputMonth, inputDay, inputHour, inputMinute;
 
@@ -134,6 +134,7 @@ public class AddItemFragment extends Fragment {
         etInputTaskTitle = view.findViewById(R.id.etInputTaskTitle);
         etInputDescription = view.findViewById(R.id.etInputDescription);
         btnSubmit =view.findViewById(R.id.btnSubmit);
+        btnDelete = view.findViewById(R.id.btnDelete);
         tvInputDate = view.findViewById(R.id.tvInputDate);
         tvInputTime = view.findViewById(R.id.tvInputTime);
         tvCategory = view.findViewById(R.id.tvCategoryFilter);
@@ -150,8 +151,6 @@ public class AddItemFragment extends Fragment {
         // We need to us getActivity() to access the intent from the host activity that contains the Fragment
         //Bundle bundle = getActivity().getIntent().getExtras();
         if (bundle != null) {
-
-
             if (userRole.equals("Patient"))
                 isUpdate = false;
             else
@@ -163,6 +162,7 @@ public class AddItemFragment extends Fragment {
             // disable the submit button
             //btnSubmit.setEnabled(false);
             btnSubmit.setVisibility(View.GONE);
+            btnDelete.setVisibility(View.GONE);
 
             // set all EditText to read only
             etInputTaskTitle.setFocusable(false);
@@ -197,8 +197,6 @@ public class AddItemFragment extends Fragment {
             tvInputTime.setOnTouchListener(null);
         }
 
-
-
         // Load data transferred from Home Fragment
         Bundle bundle_fragment = getArguments();
         if (bundle_fragment != null) {
@@ -207,6 +205,7 @@ public class AddItemFragment extends Fragment {
                 btnSubmit.setText("Add");
                 selectedDate = bundle_fragment.getString("clickedDate");    // get user clicked date
                 tvInputDate.setText(selectedDate);
+                btnDelete.setVisibility(View.GONE);
             }
             if (bundle_fragment.getString("newOrUpdate").equals("update")) {   // if update a new task
                 taskDetail = bundle_fragment.getParcelable("taskDetails");
@@ -387,6 +386,67 @@ public class AddItemFragment extends Fragment {
                     AddData();
             }
         });
+
+        btnDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create an AlertDialog.Builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(thisFragmentContext);
+                builder.setTitle("Confirm Delete");
+                builder.setMessage("Are you sure you want to delete this item?");
+
+                // Add buttons for confirming or cancelling the delete operation
+                builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User confirmed the delete operation
+                        taskCollection.document(documentId)
+                                .delete()
+                                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void unused) {
+                                        // Document successfully deleted
+                                        String hourString = String.format(Locale.getDefault(), "%02d", taskDetail.getHour());
+                                        String minuteString = String.format(Locale.getDefault(), "%02d", taskDetail.getMinute());
+                                        String msg = taskDetail.getTaskTitle() + " on " +
+                                                        taskDetail.getMonth() + "-" + taskDetail.getDay() + "-" + taskDetail.getYear() +
+                                                        "(" + hourString + ":" + minuteString + ")";
+                                        String patientId = patientList.get(selectedPatientIndex).getUserId();
+                                        writeNotification("Activity deleted: ", msg, documentId, patientId);
+                                        Toast.makeText(thisFragmentContext, "Item deleted", Toast.LENGTH_LONG).show();
+
+                                        // return to Home Fragment
+                                        HomeFragment homeFragment = new HomeFragment();
+
+                                        // Use FragmentManager to replace the current fragment with AddItemFragment
+                                        FragmentManager fragmentManager = (requireActivity().getSupportFragmentManager());
+                                        FragmentTransaction transaction = fragmentManager.beginTransaction();
+                                        transaction.replace(R.id.frame_layout, homeFragment);
+                                        //transaction.addToBackStack(null);     // do not add to the back stack
+                                        transaction.commit();
+                                    }
+                                })
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        Toast.makeText(thisFragmentContext, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
+                                    }
+                                });
+                    }
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User cancelled the delete operation, do nothing
+                    }
+                });
+
+                // Show the AlertDialog
+                builder.create().show();
+            }
+        });
+
         return view;
     }
     //end of onCreateView()

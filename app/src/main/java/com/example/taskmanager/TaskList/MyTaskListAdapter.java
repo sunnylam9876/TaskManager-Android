@@ -63,7 +63,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
             ctvComplete = itemView.findViewById(R.id.ctvComplete);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
             ivCategory = itemView.findViewById(R.id.ivCategory);
-            btnDelete = itemView.findViewById(R.id.btnDelete);
+            btnDelete = itemView.findViewById(R.id.btnDelete_temp);
             btnViewMore = itemView.findViewById(R.id.btnViewMore);
         }
     }

@@ -82,12 +82,12 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
                 //replaceFragment(new ListFragment());
                 FragmentUtility.replaceFragment(MainActivity.this, new ListFragment());
             }
-            if (item.getItemId() == R.id.AddItem) {
+            /*if (item.getItemId() == R.id.AddItem) {
                 //replaceFragment(new ListFragment());
                 //FragmentUtility.replaceFragment(MainActivity.this, new ListFragment());
                 FragmentUtility.replaceFragment(MainActivity.this, new AddItemFragment());
 
-            }
+            }*/
             if (item.getItemId() == R.id.settings) {
                 //replaceFragment(new SettingFragment());
                 FragmentUtility.replaceFragment(MainActivity.this, new SettingFragment());

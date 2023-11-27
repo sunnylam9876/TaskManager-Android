@@ -243,8 +243,9 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     // Create a bundle to pass task details to other Fragment
                     Bundle bundle = new Bundle();
                     bundle.putParcelable("taskDetails", taskToShowDetails);
-                    bundle.putString("test", "testing");
+                    //bundle.putString("test", "testing");
                     bundle.putBoolean("update", true);
+                    bundle.putString("newOrUpdate", "update");
 
                     // Navigate to other Fragment
                     AddItemFragment addItemFragment = new AddItemFragment();

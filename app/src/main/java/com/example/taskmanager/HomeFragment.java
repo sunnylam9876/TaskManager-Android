@@ -1,5 +1,6 @@
 package com.example.taskmanager;
 
+import static com.example.taskmanager.Utility.CalculateDate.dayFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.monthYearFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
@@ -16,7 +17,10 @@ import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -29,6 +33,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -74,6 +80,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
     private TextView tvUserName;
 
+    private ImageButton btnAdd;
+
 //------------------------------------------------------------------
     // for calendar
     private TextView tvMonthYear, tvFwd, tvBwd;     // TextView for choosing the month of calendar
@@ -87,6 +95,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
     private LocalDate selectedDate;
     private DateClass dateClass;      //custom date class
+
+    private String clickedDate;     // to store the user clicked date
 //------------------------------------------------------------------
 
     //set Task List
@@ -159,6 +169,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        btnAdd = view.findViewById(R.id.btnAdd);
+
         taskList = new ArrayList<>();
         originalTaskList = new ArrayList<>();
         taskInDay = new ArrayList<>();
@@ -181,6 +193,10 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             tvUserName.setText(userName + " (" + userRole +")");
             if (userRole.equals("Doctor"))
                 selectable = true;
+
+            if (userRole.equals("Patient")) {
+                btnAdd.setVisibility(View.GONE);    // hide the button and make it not occupy any space
+            }
         }
 
 
@@ -256,6 +272,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         rvCalendar = view.findViewById(R.id.rvCalendar);
         tvMonthYear = view.findViewById(R.id.tvMonthYear);
         tvPendingTaskTitle = view.findViewById(R.id.tvPendingTaskTitle);
+        rvDashboardTaskList = view.findViewById(R.id.rvDashboardTaskList);
 
         selectedDate = LocalDate.now();
         //setMonthView();
@@ -279,9 +296,31 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             }
         });
 
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create a bundle to pass task details to other Fragment
+                Bundle bundle = new Bundle();
+                bundle.putString("clickedDate", clickedDate);
+                bundle.putString("newOrUpdate", "new");
+
+                // Navigate to other Fragment
+                AddItemFragment addItemFragment = new AddItemFragment();
+                //ListFragment addItemFragment = new ListFragment();
+                addItemFragment.setArguments(bundle);
+
+                // Use FragmentManager to replace the current fragment with AddItemFragment
+                FragmentManager fragmentManager = (requireActivity().getSupportFragmentManager());
+                FragmentTransaction transaction = fragmentManager.beginTransaction();
+                transaction.replace(R.id.frame_layout, addItemFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
+        });
+
         //------------------------------------------------------------------
         //set Task List
-        rvDashboardTaskList = view.findViewById(R.id.rvDashboardTaskList);
+
         //setTaskList();
 
         //------------------------------------------------------------------
@@ -317,7 +356,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         ((MyCalendarAdapter) calendarAdapter).setOnItemClickListener(this);
 
         tvPendingTaskTitle.setText("Pending task on: " + CalculateDate.monthFromDate(selectedDate) + "-"
-                + CalculateDate.dayFromDate(selectedDate) + "-"
+                + dayFromDate(selectedDate) + "-"
                 + CalculateDate.yearFromDate(selectedDate));
     }
 
@@ -388,6 +427,11 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                                         + day + "-"
                                                         + CalculateDate.yearFromDate(selectedDate));
 
+        // update the user clicked date
+        clickedDate = CalculateDate.monthFromDate(selectedDate) + "-"
+                + day + "-"
+                + CalculateDate.yearFromDate(selectedDate);
+
         // save the information to intent
 /*        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
         Bundle bundle = new Bundle();
@@ -455,7 +499,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                         .orderBy("minute", Query.Direction.ASCENDING);
                 //.orderBy("day");
                 //.whereEqualTo("category", category);
-            } else {
+            } else {    // if specific patient was selected in the Patient drop-down menu
                 query = taskCollection
                         .whereEqualTo("year", year)
                         .whereEqualTo("month", month)
@@ -469,7 +513,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 //.whereEqualTo("category", category);
             }
 
-        } else {    // patient only view their own data
+        } else {    // if the role is a patient, who can only view their own data
             // need to create index in Firestore first, click the link in the error msg
             query = taskCollection
                     .whereEqualTo("year", year)
@@ -605,11 +649,18 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 calendar.set(Calendar.SECOND, 0);
                 calendar.set(Calendar.MILLISECOND, 0);
 
+                // Create an AlarmClockInfo object
+                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), pendingIntent);
+
+                // Set the alarm using setAlarmClock()
+                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+
                 // Schedule alarm
-                if (alarmManager != null) {
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                /*if (alarmManager != null) {
+                    //alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    alarmManager.setAlarmClock(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                     //Toast.makeText(thisFragmentContext, "notification scheduled", Toast.LENGTH_SHORT).show();
-                }
+                }*/
 
                 //update the field in database
                 eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task
@@ -620,7 +671,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
-                                Toast.makeText(getActivity(), "Alarm set", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(getActivity(), "Alarm set", Toast.LENGTH_SHORT).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {

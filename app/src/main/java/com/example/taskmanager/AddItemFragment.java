@@ -56,6 +56,8 @@ public class AddItemFragment extends Fragment {
     Context thisFragmentContext, context;
     public String userId, userRole;
 
+    String selectedDate;
+
 //---------------------------------------------------------------
     // connection to Firebase Realtime database
     FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
@@ -92,7 +94,6 @@ public class AddItemFragment extends Fragment {
     EditText etInputTaskTitle, etInputDescription;
     Button  btnSubmit;
 
-
     TextView tvInputTime, tvInputDate;
 
 
@@ -108,6 +109,25 @@ public class AddItemFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         thisFragmentContext = requireContext();
+
+
+
+        //------------------------------------------------------------------
+        //Load user name and uer id
+        // Since we are using Fragment which does not have its own Intent.
+        // We need to us getActivity() to access the intent from the host activity that contains the Fragment
+        Bundle bundle = getActivity().getIntent().getExtras();
+        if (bundle != null) {
+            userId = bundle.getString("userId");
+            //userName = bundle.getString("userName");
+            //userEmail = bundle.getString("userEmail");
+            userRole = bundle.getString("userRole");
+
+            if (userRole.equals("Doctor")) {
+                thisFragmentContext.setTheme(R.style.Doctor_Theme);
+            }
+        }
+
         View view = inflater.inflate(R.layout.fragment_add_item, container, false);
 
 
@@ -121,18 +141,17 @@ public class AddItemFragment extends Fragment {
         txtInputPatient = view.findViewById(R.id.txtInputPatient);
 
 
+
 //------------------------------------------------------------------
-        //Load user name and uer id
+        //Load user name and user id
         //TextView tvHeading = view.findViewById(R.id.tvHeading);
 
         // Since we are using Fragment which does not have its own Intent.
         // We need to us getActivity() to access the intent from the host activity that contains the Fragment
-        Bundle bundle = getActivity().getIntent().getExtras();
+        //Bundle bundle = getActivity().getIntent().getExtras();
         if (bundle != null) {
-            userId = bundle.getString("userId");
-            //userName = bundle.getString("userName");
-            //userEmail = bundle.getString("userEmail");
-            userRole = bundle.getString("userRole");
+
+
             if (userRole.equals("Patient"))
                 isUpdate = false;
             else
@@ -142,8 +161,8 @@ public class AddItemFragment extends Fragment {
         if (isUpdate == false) {    // Read only mode (i.e. Patient)
             //if (userRole.equals("Patient")) {
             // disable the submit button
-            btnSubmit.setEnabled(false);
-
+            //btnSubmit.setEnabled(false);
+            btnSubmit.setVisibility(View.GONE);
 
             // set all EditText to read only
             etInputTaskTitle.setFocusable(false);
@@ -178,35 +197,38 @@ public class AddItemFragment extends Fragment {
             tvInputTime.setOnTouchListener(null);
         }
 
+
+
         // Load data transferred from Home Fragment
         Bundle bundle_fragment = getArguments();
-        if (bundle_fragment == null) {
-            isNewTask = true;   // if no bundle transferred received, treat it as a new task
-            btnSubmit.setText("Add");
+        if (bundle_fragment != null) {
+            if (bundle_fragment.getString("newOrUpdate").equals("new")) {   // if create a new task
+                isNewTask = true;   // if no bundle transferred received, treat it as a new task
+                btnSubmit.setText("Add");
+                selectedDate = bundle_fragment.getString("clickedDate");    // get user clicked date
+                tvInputDate.setText(selectedDate);
+            }
+            if (bundle_fragment.getString("newOrUpdate").equals("update")) {   // if update a new task
+                taskDetail = bundle_fragment.getParcelable("taskDetails");
+                documentId = taskDetail.getId();
+
+                isNewTask = false;
+                btnSubmit.setText("Update");
+
+                etInputTaskTitle.setText(taskDetail.getTaskTitle());
+                etInputDescription.setText(taskDetail.getDescription());
+                tvSelectPatient.setText(taskDetail.getPatientName());
+                tvCategory.setText(taskDetail.getCategory());
+                tvInputDate.setText(taskDetail.getMonth() + "-" + taskDetail.getDay() + "-" + taskDetail.getYear());
+                String hourString = String.format(Locale.getDefault(), "%02d", taskDetail.getHour());
+                String minuteString = String.format(Locale.getDefault(), "%02d", taskDetail.getMinute());
+                tvInputTime.setText(hourString +":" + minuteString);
+
+                //tvInputDate = view.findViewById(R.id.tvInputDate);
+                //tvInputTime = view.findViewById(R.id.tvInputTime);
+            }
+
         }
-        else {
-            taskDetail = bundle_fragment.getParcelable("taskDetails");
-            documentId = taskDetail.getId();
-
-            isNewTask = false;
-            btnSubmit.setText("Update");
-
-
-            etInputTaskTitle.setText(taskDetail.getTaskTitle());
-            etInputDescription.setText(taskDetail.getDescription());
-            tvSelectPatient.setText(taskDetail.getPatientName());
-            tvCategory.setText(taskDetail.getCategory());
-            tvInputDate.setText(taskDetail.getMonth() + "-" + taskDetail.getDay() + "-" + taskDetail.getYear());
-            String hourString = String.format(Locale.getDefault(), "%02d", taskDetail.getHour());
-            String minuteString = String.format(Locale.getDefault(), "%02d", taskDetail.getMinute());
-            tvInputTime.setText(hourString +":" + minuteString);
-
-            //tvInputDate = view.findViewById(R.id.tvInputDate);
-            //tvInputTime = view.findViewById(R.id.tvInputTime);
-
-
-        }
-
 //------------------------------------------------------------------
         // get Patient list from Firestore
         // and set the Patient drop-down menu

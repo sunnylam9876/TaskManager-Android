@@ -4,6 +4,7 @@ import static com.example.taskmanager.Utility.CalculateDate.dayFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Color;
 import android.view.LayoutInflater;
@@ -34,6 +35,9 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
     private ArrayList<TaskCategoryClass> taskInDay;
 
     private LocalDate today;
+
+    private static int selectedPosition = -1;
+
 
     private static OnItemClickListener onItemClickListener;
 
@@ -67,6 +71,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
         return viewHolder;
     }
 
+    @SuppressLint("ResourceAsColor")
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
 
@@ -121,6 +126,21 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             holder.ivOthers.setVisibility(View.VISIBLE);
         else
             holder.ivOthers.setVisibility(View.INVISIBLE);
+
+
+        if (selectedPosition == position) {
+            // Highlight the clicked cell
+            holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.pink));
+        } else {
+            // Unhighlight the clicked cell
+            holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            //highlight Today
+            if (holder.cellDayText.getText().toString().equals(Integer.toString(today_day)) &&
+                    dateClass.getYear() == today_year && dateClass.getMonth() == today_month) {
+                //int color = ContextCompat.getColor(holder.itemView.getContext(), R.color.lightblue);
+                holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.lightblue));
+            }
+        }
     }
 
     @Override
@@ -129,7 +149,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
     }
 
     //2- View holder class
-    public static class MyViewHolder extends RecyclerView.ViewHolder {
+    public class MyViewHolder extends RecyclerView.ViewHolder {
         public TextView cellDayText;
         public TextView tvNumberOfTask;
         public ImageView ivAppointment, ivMedicine, ivWorkout, ivOthers;
@@ -140,7 +160,7 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             super(itemView);
 
             cellDayText = itemView.findViewById(R.id.cellDayText);
-            tvNumberOfTask = itemView.findViewById(R.id.tvNumberOfTask);
+            //tvNumberOfTask = itemView.findViewById(R.id.tvNumberOfTask);
             //cellTask = itemView.findViewById(R.id.cellTask_1);
             calendarCell = itemView.findViewById(R.id.calendarCell);
             ivAppointment = itemView.findViewById(R.id.ivAppointment);
@@ -168,7 +188,18 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
                     if (onItemClickListener != null && !cellDayText.getText().equals("")) {
                         onItemClickListener.onItemClick(cellDayText.getText().toString());
                     }
+
+                    // Update the selected position
+                    if (selectedPosition != getAdapterPosition()) {
+                        selectedPosition = getAdapterPosition();
+                        // Notify the adapter to refresh all items
+                        notifyDataSetChanged();
+                    }
+
+
                 }
+
+
             });
         }
     }

@@ -94,10 +94,6 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
             }
             return true;
         });
-
-
-
-
     }
 
     @Override

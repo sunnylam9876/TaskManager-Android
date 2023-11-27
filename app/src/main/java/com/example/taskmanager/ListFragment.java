@@ -313,7 +313,7 @@ public class ListFragment extends Fragment {
     //set the content of Task List
     private void setTaskList(ArrayList<TaskClass> taskList) {
 
-        taskListAdapter = new MyTaskListAdapter(taskList, thisFragmentContext);
+        taskListAdapter = new MyTaskListAdapter(taskList, userRole, thisFragmentContext);
         taskListLayoutManager = new LinearLayoutManager(thisFragmentContext);
         rvList.setLayoutManager(taskListLayoutManager);
         rvList.setAdapter(taskListAdapter);

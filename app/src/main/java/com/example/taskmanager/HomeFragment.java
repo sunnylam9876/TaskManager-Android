@@ -166,6 +166,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         thisFragmentContext = requireContext();
 
+
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
@@ -460,7 +461,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         //taskListAdapter = new MyTaskListAdapter(taskList, thisFragmentContext);   // for displaying all data in the selected month, testing only
 
-        taskListAdapter = new MyTaskListAdapter(selectedDayTaskList, thisFragmentContext);
+        taskListAdapter = new MyTaskListAdapter(selectedDayTaskList, userRole, thisFragmentContext);
         taskListLayoutManager = new LinearLayoutManager(thisFragmentContext);
         rvDashboardTaskList.setLayoutManager(taskListLayoutManager);
         rvDashboardTaskList.setAdapter(taskListAdapter);

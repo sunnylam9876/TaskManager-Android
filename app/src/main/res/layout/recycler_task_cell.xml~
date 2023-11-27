@@ -74,7 +74,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:background="@color/grey"
-                        app:srcCompat="@drawable/baseline_pageview_doctor_24" />
+                        app:srcCompat="@drawable/baseline_pageview_24" />
 
                 </LinearLayout>
 

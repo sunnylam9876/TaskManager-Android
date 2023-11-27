@@ -42,10 +42,13 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     private List<TaskClass> taskList;
     private Context context;
 
+    private String userRole;
+
     // constructor
-    public MyTaskListAdapter(List<TaskClass> taskList, Context context) {
+    public MyTaskListAdapter(List<TaskClass> taskList, String userRole, Context context) {
         this.taskList = taskList;
         this.context = context;
+        this.userRole = userRole;
     }
 
     //2 define view holder
@@ -54,7 +57,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         public TextView tvTaskListDue;
         public ImageView ivCategory;
 
-        public ImageButton btnDelete, btnViewMore;
+        public ImageButton btnViewMore;
 
         // constructor
         public MyViewHolder(@NonNull View itemView) {
@@ -63,7 +66,6 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
             ctvComplete = itemView.findViewById(R.id.ctvComplete);
             tvTaskListDue = itemView.findViewById(R.id.tvTaskListDue);
             ivCategory = itemView.findViewById(R.id.ivCategory);
-            btnDelete = itemView.findViewById(R.id.btnDelete_temp);
             btnViewMore = itemView.findViewById(R.id.btnViewMore);
         }
     }
@@ -80,6 +82,10 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+        if (userRole.equals("Patient")) {
+            holder.btnViewMore.setImageResource(R.drawable.baseline_pageview_24);
+        }
+
         // Assign title, due date and color for the list
         TaskClass eachTask = taskList.get(position);
         holder.ctvComplete.setText(eachTask.getTaskTitle());
@@ -200,37 +206,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         });
 
 //---------------------------------------------------------------------------------------------------------------------------------
-        // To delete a task
-        holder.btnDelete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                int adapterPosition = holder.getAdapterPosition();
-                if (adapterPosition != RecyclerView.NO_POSITION) {
-                    TaskClass taskToDelete = taskList.get(adapterPosition);
 
-                    // Ge the document id of the Firestore document to delete
-                    String documentId = taskToDelete.getId();
-
-
-                    taskCollection.document(documentId)
-                            .delete()
-                            .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                @Override
-                                public void onSuccess(Void unused) {
-                                    // Document successfully deleted
-                                    taskList.remove(adapterPosition);
-                                    notifyItemRemoved(adapterPosition);
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Toast.makeText(context, "Error: " + e.toString(), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                }
-            }
-        });
 //---------------------------------------------------------------------------------------------------------------------------------
         // To view the task details
         holder.btnViewMore.setOnClickListener(new View.OnClickListener() {

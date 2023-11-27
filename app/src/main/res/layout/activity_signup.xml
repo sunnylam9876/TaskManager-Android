@@ -5,6 +5,7 @@
 
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:theme="@style/Patient_Theme"
     tools:context=".SignupActivity">
 
     <LinearLayout
@@ -76,11 +77,11 @@
             android:layout_marginTop="5dp"
             android:layout_marginRight="20dp"
             android:layout_marginBottom="16dp"
-            android:textColor="@color/purple_two"
-            android:textColorHint="@color/purple_two"
-
             android:focusable="false"
             android:outlineProvider="none"
+
+            android:textColor="@color/purple_two"
+            android:textColorHint="@color/purple_two"
             app:boxStrokeColor="@android:color/transparent"
             app:boxStrokeWidth="1dp">
 
@@ -91,12 +92,12 @@
                 android:background="@android:color/transparent"
                 android:drawableStart="@drawable/baseline_group_24_purple"
                 android:drawablePadding="14dp"
-                android:textColor="@color/purple_two"
-                android:textColorHint="@color/purple_two"
                 android:hint="Role"
                 android:inputType="none"
                 android:padding="16dp"
-                android:text="" />
+                android:text=""
+                android:textColor="@color/purple_two"
+                android:textColorHint="@color/purple_two" />
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
@@ -136,9 +137,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:srcCompat="@drawable/bottom_right" />
-
-
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -216,7 +216,7 @@ public class MyForegroundService extends Service {
                                 //eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task
                                 Map<String, Object> updatedData = new HashMap<>();
                                 updatedData.put("setAlarm", true);
-                                String documentId = taskCollection.document().getId();
+                                String documentId = document.getId();
                                 //Toast.makeText(getApplicationContext(), documentId, Toast.LENGTH_LONG).show();
 
                                 taskCollection.document(documentId).update(updatedData)

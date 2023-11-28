@@ -6,6 +6,9 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
@@ -21,8 +24,25 @@ public class MyNotificationReceiver extends BroadcastReceiver {
     @SuppressLint("MissingPermission")
     @Override
     public void onReceive(Context context, Intent intent) {
-        Intent i = new Intent(context, MainActivity.class);      //NotificationDetails.class
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        // Acquire a wake lock to turn on the screen
+        PowerManager powerManager = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+        if (powerManager != null) {
+            PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                    PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    "MyApp::MyWakelockTag");
+
+            wakeLock.acquire(1 * 60 * 1000L /* 1 minutes */);
+
+            // Release the wake lock after a short duration
+            new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                if (wakeLock.isHeld()) {
+                    wakeLock.release();
+                }
+            }, 3000); // Adjust the time as needed, e.g., 3000 milliseconds = 3 seconds
+        }
+
+        Intent i = new Intent(context, MainActivity.class); //NotificationDetails.class
+        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_IMMUTABLE);
 
         int notificationId = intent.getIntExtra("notification_id", 4000);
@@ -40,34 +60,6 @@ public class MyNotificationReceiver extends BroadcastReceiver {
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
         notificationManager.notify(notificationId, builder.build());
-        //Toast.makeText(context, "notification sent", Toast.LENGTH_SHORT).show();
-        //sendNotification(context);
-    }
-
-    @SuppressLint("MissingPermission")
-    public void sendNotification(Context context) {
-        // Create an explicit intent for an Activity in your app.
-        Intent intent = new Intent(context, NotificationDetails.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle("Scheduled message")
-                        .setContentText("Scheduled")
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        // Set the intent that fires when the user taps the notification.
-                        .setContentIntent(pendingIntent)
-                        .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
-
-        // notificationId is a unique int for each notification that you must define.
-        int notificationId = 1;
-        notificationManager.notify(notificationId, builder.build());
-
-        Toast.makeText(context, "Notification sent!", Toast.LENGTH_LONG).show();
     }
 }
+

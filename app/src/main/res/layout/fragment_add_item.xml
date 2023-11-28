@@ -180,7 +180,7 @@
                 android:layout_marginLeft="16dp"
                 android:layout_marginTop="5dp"
                 android:layout_marginRight="16dp"
-                android:text="xxx"
+                android:text="Add"
                 android:textSize="22sp" />
 
             <Button

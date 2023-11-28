@@ -1,10 +1,12 @@
 package com.example.taskmanager;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -43,6 +45,7 @@ public class SettingFragment extends Fragment {
 
     // Initialize Firebase Authentication
     FirebaseAuth auth = FirebaseAuth.getInstance();
+    String userId, userName, userRole;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,78 +53,69 @@ public class SettingFragment extends Fragment {
         // Inflate the layout for this fragment
         thisFragmentContext = requireContext();
         View view = inflater.inflate(R.layout.fragment_setting, container, false);
+
+//--------------------------------------------------------------------------------------------------------------------
+        // Load user name and uer id
+        // Since we are using Fragment which does not have its own Intent.
+        // We need to access the intent from the host activity that contains the Fragment
+        Bundle bundle = getActivity().getIntent().getExtras();
+        if (bundle != null) {
+            userId = bundle.getString("userId");
+            userName = bundle.getString("userName");
+            //userEmail = bundle.getString("userEmail");
+            userRole = bundle.getString("userRole");
+            if (userRole.equals("Doctor")) {
+                thisFragmentContext.setTheme(R.style.Doctor_Theme);
+            }
+        }
+//--------------------------------------------------------------------------------------------------------------------
         btnSignout = view.findViewById(R.id.btnSignout);
 
-        //tvMsg = view.findViewById(R.id.tvMsg);
+
 
         btnSignout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // sign out
-                auth.signOut();
-                Toast.makeText(thisFragmentContext, "Signed out", Toast.LENGTH_SHORT).show();
+                // Build an AlertDialog to confirm sign out
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                builder.setTitle("Confirm Sign Out");
+                builder.setMessage("Are you sure you want to sign out?");
 
-                //redirect to login activity
-                Intent intent = new Intent(getActivity(), LoginActivity.class);
-                startActivity(intent);
+                // Add positive button (Yes)
+                builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Sign out
+                        auth.signOut();
+                        Toast.makeText(thisFragmentContext, "Signed out", Toast.LENGTH_LONG).show();
+
+                        // Redirect to the login activity
+                        Intent intent = new Intent(getActivity(), LoginActivity.class);
+                        startActivity(intent);
+                    }
+                });
+
+                // Add negative button (No)
+                builder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // User clicked "No," do nothing or dismiss the dialog
+                        dialog.dismiss();
+                    }
+                });
+
+                // Create and show the AlertDialog
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
             }
         });
-
-        //createNotificationChannel();
-        //sendNotification(requireContext());
-
-        //readRealTimeDb();
-
-        //Intent serviceIntent = new Intent(requireContext(), MyForegroundService.class);
-        //thisFragmentContext.startService(serviceIntent);
 
 
         return view;
 
     }   //end of onCreate()
 //--------------------------------------------------------------------------------------------------------------------
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is not in the Support Library.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Task Management System";
-            String description = "test_channel_for_csis_4175";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this.
-            NotificationManager notificationManager = requireActivity().getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
-        }
-    }
 
-    @SuppressLint("MissingPermission")
-    public void sendNotification(Context context, String title, String msg) {
-        // Create an explicit intent for an Activity in your app.
-        Intent intent = new Intent(context, NotificationDetails.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE);
-
-        NotificationCompat.Builder builder =
-                new NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
-                        .setContentTitle(title)
-                        .setContentText(msg)
-                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                        // Set the intent that fires when the user taps the notification.
-                        .setContentIntent(pendingIntent)
-                        .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(context);
-
-        // notificationId is a unique int for each notification that you must define.
-        int notificationId = 1;
-        notificationManager.notify(notificationId, builder.build());
-
-        Toast.makeText(context, "Notification sent from SettingFragment!", Toast.LENGTH_LONG).show();
-    }
 
 
 

@@ -18,6 +18,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -171,6 +172,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         view = inflater.inflate(R.layout.fragment_home, container, false);
 
         btnAdd = view.findViewById(R.id.btnAdd);
+        tvFwd = view.findViewById(R.id.tvFwd);
+        tvBwd = view.findViewById(R.id.tvBwd);
 
         taskList = new ArrayList<>();
         originalTaskList = new ArrayList<>();
@@ -191,12 +194,14 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             userEmail = bundle.getString("userEmail");
             userRole = bundle.getString("userRole");
 
-            tvUserName.setText(userName + " (" + userRole +")");
+            tvUserName.setText(userName);
             if (userRole.equals("Doctor"))
                 selectable = true;
 
             if (userRole.equals("Patient")) {
                 btnAdd.setVisibility(View.GONE);    // hide the button and make it not occupy any space
+                tvFwd.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_theme_light_primary2));
+                tvBwd.setTextColor(ContextCompat.getColor(requireContext(), R.color.md_theme_light_primary2));
             }
         }
 
@@ -249,7 +254,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             selectedPatient = parent.getItemAtPosition(position).toString();
                                             selectedPatientIndex = position - 1;
-                                            Toast.makeText(thisFragmentContext, selectedPatient + ":" + selectedPatientIndex, Toast.LENGTH_SHORT).show();
+                                            //Toast.makeText(thisFragmentContext, selectedPatient + ":" + selectedPatientIndex, Toast.LENGTH_SHORT).show();
                                             LoadDataFromDB();
                                             //filterTask(selectedPatient, selectedCategory);
                                             //setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
@@ -278,10 +283,10 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         selectedDate = LocalDate.now();
         //setMonthView();
 
-        tvFwd = view.findViewById(R.id.tvFwd);
-        tvBwd = view.findViewById(R.id.tvBwd);
-
         LoadDataFromDB();   // load data from Firestore
+
+        MyCalendarAdapter adapter = new MyCalendarAdapter();
+        adapter.resetBackgroundColors();
 
         tvFwd.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -303,6 +308,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 // Create a bundle to pass task details to other Fragment
                 Bundle bundle = new Bundle();
                 bundle.putString("clickedDate", clickedDate);
+                bundle.putString("selectedPatient", selectedPatient);
                 bundle.putString("newOrUpdate", "new");
 
                 // Navigate to other Fragment
@@ -356,7 +362,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         calendarAdapter.notifyDataSetChanged();
         ((MyCalendarAdapter) calendarAdapter).setOnItemClickListener(this);
 
-        tvPendingTaskTitle.setText("Pending task on: " + CalculateDate.monthFromDate(selectedDate) + "-"
+        tvPendingTaskTitle.setText("Pending activities on: " + CalculateDate.monthFromDate(selectedDate) + "-"
                 + dayFromDate(selectedDate) + "-"
                 + CalculateDate.yearFromDate(selectedDate));
     }
@@ -424,7 +430,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     public void onItemClick(String day) {
         //Toast.makeText(thisFragmentContext, "Selected Day: " + day + " " + monthFromDate(selectedDate) + " " + yearFromDate(selectedDate), Toast.LENGTH_SHORT).show();
         setTaskList(Integer.parseInt(day));
-        tvPendingTaskTitle.setText("Pending task on: " + CalculateDate.monthFromDate(selectedDate) + "-"
+        tvPendingTaskTitle.setText("Pending activities on: " + CalculateDate.monthFromDate(selectedDate) + "-"
                                                         + day + "-"
                                                         + CalculateDate.yearFromDate(selectedDate));
 
@@ -433,18 +439,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 + day + "-"
                 + CalculateDate.yearFromDate(selectedDate);
 
-        // save the information to intent
-/*        Intent i = new Intent(getActivity(), TaskDetailActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putString("userName", userName);
-        bundle.putString("userId", userId);
-        bundle.putString("userEmail", userEmail);
-        bundle.putString("userRole", userRole);
-        i.putExtras(bundle);
-
-        //redirect to MainActivity
-        //context.startActivity(i);
-        startActivity(i);*/
     }
 //------------------------------------------------------------------
     //set the content of Task List
@@ -590,41 +584,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     }
 //------------------------------------------------------------------
 
-    private void handleSelectPatient() {
-        // filtered task to taskList
-        if (selectable) {   // Doctor:
-            for (TaskClass eachTask : originalTaskList) {
-                if (selectedPatient.equals("All")) {
-                    taskList.clear();
-                    taskList.addAll(originalTaskList);
-                }
-                if (eachTask.getPatientName().equals(selectedPatient)) {
-                    taskList.add(eachTask);
-                }
-            }
 
-        } else {    // Patient:
-            taskList.clear();
-            taskList.addAll(originalTaskList);
-        }
-    }
-    private void createNotificationChannel() {
-        // Create the NotificationChannel, but only on API 26+ because
-        // the NotificationChannel class is not in the Support Library.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence name = "Task Management System";
-            String description = "test_channel_for_csis_4175";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
-            channel.setDescription(description);
-            // Register the channel with the system; you can't change the importance
-            // or other notification behaviors after this.
-            NotificationManager notificationManager = requireActivity().getSystemService(NotificationManager.class);
-            // NotificationManager.class
-            notificationManager.createNotificationChannel(channel);
-            //Toast.makeText(thisFragmentContext, "Channel created", Toast.LENGTH_SHORT).show();
-        }
-    }
 
     private void scheduleAlarm() {
         // loop through the taskList to see if alarm was set for each task

@@ -45,7 +45,7 @@ public class ListFragment extends Fragment {
     Context thisFragmentContext, context;
 
     // Set user variables
-    String userId, userName, userEmail, userRole;
+    String userId, userName, userRole;
 
     boolean selectable = false;      // indicate whether the Patient drop-down menu is selectable or not
 

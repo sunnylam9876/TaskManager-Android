@@ -672,7 +672,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void unused) {
-                                //Toast.makeText(getActivity(), "Alarm set", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity(), "Alarm set for activity: " + eachTask.getTaskTitle(), Toast.LENGTH_LONG).show();
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {

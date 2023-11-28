@@ -11,7 +11,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -81,7 +84,29 @@ public class MyForegroundService extends Service {
         auth = FirebaseAuth.getInstance();
         currentUser = auth.getCurrentUser();
 
+        if (intent != null && intent.getExtras() != null) {
+            Bundle receivedBundle = intent.getExtras();
+            userId = receivedBundle.getString("userId");
+            userRole = receivedBundle.getString("userRole");
+        }
 
+        if (!isServiceStarted) {
+            // Create a notification for the foreground service
+            Notification notification = buildNotification(this, "Task Management App is running", "");
+
+            // Start the service in the foreground with the notification
+            startForeground(SERVICE_NOTIFICATION_ID, notification);
+
+            // Set the flag indicating the service has been started
+            isServiceStarted = true;
+
+            getUserInfo(intent);
+            setupRealTimeDbListener();
+        }
+        return START_STICKY; // Service will be restarted if it's killed by the system
+    }
+
+    private void getUserInfo(Intent intent) {
         if (intent != null && intent.getExtras() != null) {
             Bundle receivedBundle = intent.getExtras();
             userId = receivedBundle.getString("userId");
@@ -112,50 +137,118 @@ public class MyForegroundService extends Service {
                         });
             }
         }
+    }
 
+    private void setupRealTimeDbListener() {
+        // connection to Firebase Realtime database
+        FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = realtime_db.getReference(userId);
 
-        if (!isServiceStarted) {
-            // Create a notification for the foreground service
-            Notification notification = buildNotification(this, "Task Management App is running", "");
+        // set realtime database event listener
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (isFirstLoad) {
+                    isFirstLoad = false; // Set the flag to false after the first load
+                } else {
+                    wakeUpScreen();     // wake up the screen to show notifications
 
-            // Start the service in the foreground with the notification
-            startForeground(SERVICE_NOTIFICATION_ID, notification);
+                    MsgClass newValue = snapshot.getValue(MsgClass.class);
 
-            // Set the flag indicating the service has been started
-            isServiceStarted = true;
+                    showFloatingNotification(newValue.getTitle(), newValue.getMsg());
 
-            // connection to Firebase Realtime database
-            FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
-            DatabaseReference myRef = realtime_db.getReference(userId);
+                    // send a broadcast msg, the HomeFragment will update the calendar
+                    // once it receive the intent
+                    Intent intent = new Intent("LOAD_DATA_FROM_DB");
+                    sendBroadcast(intent);
+                    LoadDataInBackground();
+                    //testLoadData();
+                }
+            }
 
-            // set realtime database event listener
-            myRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (isFirstLoad) {
-                        isFirstLoad = false; // Set the flag to false after the first load
-                    } else {
-                        MsgClass newValue = snapshot.getValue(MsgClass.class);
-                        //tvMsg.setText(newValue.getTitle() + "; " + newValue.getMsg() + "; Id: " + newValue.getDocumentId());
-                        //showNotification(newValue.getTitle(), newValue.getMsg());
-                        showFloatingNotification(newValue.getTitle(), newValue.getMsg());
+            private void LoadDataInBackground() {
 
+                //ArrayList<TaskClass> taskList = new ArrayList<>();
+                Query query = taskCollection
+                        .whereEqualTo("patientId", userId);
+                //.whereEqualTo("setAlarm", false);
 
-                        // send a broadcast msg, the HomeFragment will update the calendar
-                        // once it receive the intent
-                        Intent intent = new Intent("LOAD_DATA_FROM_DB");
-                        sendBroadcast(intent);
-                        //LoadDataInBackground();
+                // Execute the query to get the matching documents
+
+                Task<QuerySnapshot> querySnapshotTask = taskCollection
+                        .whereEqualTo("patientId", userId)
+                        .whereEqualTo("setAlarm", false)
+                        .get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                TaskClass eachTask = document.toObject(TaskClass.class);
+                                //eachTask.setId(document.getId());       // To get document id for further update or delete
+
+                                // this part cut out
+                                AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                                Intent intent = new Intent(MyForegroundService.this, MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
+                                long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
+                                intent.putExtra("msg", eachTask.getTaskTitle());
+                                intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
+
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(MyForegroundService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                                Calendar calendar = Calendar.getInstance();
+                                calendar.setTimeInMillis(System.currentTimeMillis());
+
+                                // Set the desired time for the notification (replace with your desired time logic)
+                                calendar.set(Calendar.YEAR, eachTask.getYear());
+                                calendar.set(Calendar.MONTH, eachTask.getMonth() - 1);  //Note: Months are zero-based (0 for January, 1 for February, etc.)
+                                calendar.set(Calendar.DAY_OF_MONTH, eachTask.getDay());
+                                calendar.set(Calendar.HOUR_OF_DAY, eachTask.getHour());
+                                calendar.set(Calendar.MINUTE, eachTask.getMinute());
+                                calendar.set(Calendar.SECOND, 0);
+                                calendar.set(Calendar.MILLISECOND, 0);
+
+                                // Create an AlarmClockInfo object
+                                AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), pendingIntent);
+
+                                // Set the alarm using setAlarmClock()
+                                alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
+
+                                //update the field in database
+                                //eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task
+                                Map<String, Object> updatedData = new HashMap<>();
+                                updatedData.put("setAlarm", true);
+                                String documentId = taskCollection.document().getId();
+                                //Toast.makeText(getApplicationContext(), documentId, Toast.LENGTH_LONG).show();
+
+                                taskCollection.document(documentId).update(updatedData)
+                                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                                            @Override
+                                            public void onSuccess(Void unused) {
+                                                Toast.makeText(getApplicationContext(), "Alarm set in foreground", Toast.LENGTH_LONG).show();
+                                            }
+                                        })
+                                        .addOnFailureListener(new OnFailureListener() {
+                                            @Override
+                                            public void onFailure(@NonNull Exception e) {
+                                                Toast.makeText(getApplicationContext(), "Error on updating task:" + e.getMessage(), Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+
+                            Toast.makeText(getApplicationContext(), "OK now", Toast.LENGTH_LONG).show();
+                        } else {
+                            // Display the error
+                            Toast.makeText(getApplicationContext(), task.getException().toString(), Toast.LENGTH_LONG).show();
+                            Log.d("Firestore error", task.getException().toString());
+                        }
                     }
-                }
+                });
+            }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
-        }
-        return START_STICKY; // Service will be restarted if it's killed by the system
+            }
+        });
     }
 
     @Override
@@ -251,78 +344,24 @@ public class MyForegroundService extends Service {
         // TODO: Remove the ValueEventListener and clean up resources
     }
 
-    private void LoadDataInBackground() {
-
-            ArrayList<TaskClass> taskList = new ArrayList<>();
-            Query query = taskCollection
-                    .whereEqualTo("patientId", userId)
-                    .whereEqualTo("setAlarm", false);
-
-            // Execute the query to get the matching documents
-            query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            TaskClass eachTask = document.toObject(TaskClass.class);
-                            //eachTask.setId(document.getId());       // To get document id for further update or delete
-                            //originalTaskList.add(eachTask);
-                            //taskList.add(eachTask);
-                            AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                            Intent intent = new Intent(MyForegroundService.this, MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
-                            long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
-                            intent.putExtra("msg", eachTask.getTaskTitle());
-                            intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
-
-                            PendingIntent pendingIntent = PendingIntent.getBroadcast(MyForegroundService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
-
-                            Calendar calendar = Calendar.getInstance();
-                            calendar.setTimeInMillis(System.currentTimeMillis());
-
-                            // Set the desired time for the notification (replace with your desired time logic)
-                            calendar.set(Calendar.YEAR, eachTask.getYear());
-                            calendar.set(Calendar.MONTH, eachTask.getMonth() - 1);  //Note: Months are zero-based (0 for January, 1 for February, etc.)
-                            calendar.set(Calendar.DAY_OF_MONTH, eachTask.getDay());
-                            calendar.set(Calendar.HOUR_OF_DAY, eachTask.getHour());
-                            calendar.set(Calendar.MINUTE, eachTask.getMinute());
-                            calendar.set(Calendar.SECOND, 0);
-                            calendar.set(Calendar.MILLISECOND, 0);
-
-                            // Create an AlarmClockInfo object
-                            AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), pendingIntent);
-
-                            // Set the alarm using setAlarmClock()
-                            alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
 
 
-                            //update the field in database
-                            eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task
-                            Map<String, Object> updatedData = new HashMap<>();
-                            updatedData.put("setAlarm", true);
-                            taskCollection.document(eachTask.getId())
-                                    .update(updatedData)
-                                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                                        @Override
-                                        public void onSuccess(Void unused) {
-                                            Toast.makeText(getApplicationContext(), "Alarm set in foreground", Toast.LENGTH_LONG).show();
-                                        }
-                                    })
-                                    .addOnFailureListener(new OnFailureListener() {
-                                        @Override
-                                        public void onFailure(@NonNull Exception e) {
-                                            Toast.makeText(getApplicationContext(), "Error on updating task:" + e.getMessage(), Toast.LENGTH_LONG).show();
-                                        }
-                                    });
-                        }
+    private void wakeUpScreen() {
+        PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        PowerManager.WakeLock wakeLock = powerManager.newWakeLock(
+                PowerManager.FULL_WAKE_LOCK |
+                        PowerManager.ACQUIRE_CAUSES_WAKEUP |
+                        PowerManager.ON_AFTER_RELEASE,
+                "MyApp::MyWakelockTag");
 
+        wakeLock.acquire(1*60*1000L /*1 minutes*/); // Acquire for 1 minutes wakeup
 
-                    } else {
-                        // Display the error
-                        Toast.makeText(getApplicationContext(), task.getException().toString(), Toast.LENGTH_LONG).show();
-                        Log.d("Firestore error", task.getException().toString());
-                    }
-                }
-            });
+        // Release the wake lock after a short duration
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            if (wakeLock.isHeld()) {
+                wakeLock.release();
+            }
+        }, 3000); // Adjust the time as needed, e.g., 3000 milliseconds = 3 seconds
     }
 
 }

@@ -63,10 +63,6 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
 
         setContentView(R.layout.activity_main);   // disabled since we use view binding
 
-        // for view binding
-        //binding = ActivityMainBinding.inflate(getLayoutInflater());
-        //setContentView(binding.getRoot());
-
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
         //replaceFragment(new HomeFragment());    // set default view

@@ -54,6 +54,10 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
         this.daysOfMonth = daysOfMonth;
         this.context = context;
     }*/
+public MyCalendarAdapter() {
+
+}
+
     public MyCalendarAdapter(DateClass dateClass, ArrayList<TaskCategoryClass> taskInDay, Context context) {
         this.dateClass = dateClass;
         this.context = context;
@@ -79,12 +83,6 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
 
         //allocate day array to each TextView
         holder.cellDayText.setText(day);
-
-        // For testing purpose:
-        /*holder.tvNumberOfTask.setText("A: " + taskInDay.get(position).getAppointment() +
-                                        "; M: " + taskInDay.get(position).getMedicine() +
-                                        "; W: " + taskInDay.get(position).getWorkout() +
-                                        "; O: " + taskInDay.get(position).getOthers());*/
 
         //get today date, then highlight today on calendar
         today = LocalDate.now();
@@ -172,17 +170,6 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
             calendarCell.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // Change the bg color of the selected day
-                    /*int color = ContextCompat.getColor(itemView.getContext(), R.color.pink);
-                    // Check if there's a previously selected TextView
-                    if (cellDayText != null) {
-                        // Revert the background color of the previously selected TextView
-                        cellDayText.setBackgroundColor(Color.WHITE);
-                    }
-
-                    // Set the background color of the clicked TextView
-                    cellDayText.setBackgroundColor(color);
-                    cellDayText = cellDayText; // Update the currently selected TextView*/
 
                     // call the onItemClick method in HomeFragment.java
                     if (onItemClickListener != null && !cellDayText.getText().equals("")) {
@@ -195,12 +182,14 @@ public class MyCalendarAdapter extends RecyclerView.Adapter<MyCalendarAdapter.My
                         // Notify the adapter to refresh all items
                         notifyDataSetChanged();
                     }
-
-
                 }
-
-
             });
         }
     }
+
+    public void resetBackgroundColors() {
+        selectedPosition = -1; // Reset the selected position
+        notifyDataSetChanged(); // Notify the adapter to refresh all items
+    }
+
 }

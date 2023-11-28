@@ -57,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
         tvSignup = findViewById(R.id.tvSignup);
         tvLoginMsg = findViewById(R.id.tvLoginMsg);
 
-        // get the user information and put it in bundle
         getUserInfo(context);
 
         // set login button onClick listener
@@ -104,11 +103,9 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, SignupActivity.class));
             }
         });
-
-
     }
 
-    // get user information from Firestore, and put it in bundle and redirect to MainActivity
+    // Get user information and redirect to MainActivity if the user logged in
     private void getUserInfo(Context context) {
         currentUser = auth.getCurrentUser();
         if (currentUser != null) {
@@ -158,5 +155,6 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         }
+
     }
 }

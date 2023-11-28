@@ -141,8 +141,6 @@ public class AddItemFragment extends Fragment {
         tvSelectPatient = view.findViewById(R.id.tvHomePatientFilter);
         txtInputPatient = view.findViewById(R.id.txtInputPatient);
 
-
-
 //------------------------------------------------------------------
         //Load user name and user id
         //TextView tvHeading = view.findViewById(R.id.tvHeading);
@@ -203,8 +201,13 @@ public class AddItemFragment extends Fragment {
             if (bundle_fragment.getString("newOrUpdate").equals("new")) {   // if create a new task
                 isNewTask = true;   // if no bundle transferred received, treat it as a new task
                 btnSubmit.setText("Add");
-                selectedDate = bundle_fragment.getString("clickedDate");    // get user clicked date
+                selectedDate = bundle_fragment.getString("clickedDate");    // get user clicked date in HomeFragment
                 tvInputDate.setText(selectedDate);
+                String selectedPatient = bundle_fragment.getString("selectedPatient");  // get user selected Patient in HomeFragment
+                if (!selectedPatient.equals("All")) {
+                    tvSelectPatient.setText(selectedPatient);
+                }
+
                 btnDelete.setVisibility(View.GONE);
             }
             if (bundle_fragment.getString("newOrUpdate").equals("update")) {   // if update a new task
@@ -345,11 +348,6 @@ public class AddItemFragment extends Fragment {
                             String hourString = String.format(Locale.getDefault(), "%02d", timePicker.getHour());
                             String minuteString = String.format(Locale.getDefault(), "%02d", timePicker.getMinute());
                             tvInputTime.setText(hourString + ":" + minuteString);
-                            //int hour = Integer.parseInt(tvInputTime.getText().toString().substring(0,2));
-                            //int minute = Integer.parseInt(tvInputTime.getText().toString().substring(3));
-                            //inputHour = Integer.parseInt(hourString);
-                            //inputMinute = Integer.parseInt(minuteString);
-                            //Toast.makeText(thisFragmentContext, inputHour + " : " + inputMinute, Toast.LENGTH_LONG).show();
                         }
                     });
                     timePicker.show(getActivity().getSupportFragmentManager(), "tag");
@@ -357,8 +355,6 @@ public class AddItemFragment extends Fragment {
                 }
             });
         }
-
-
 
 //------------------------------------------------------------------
         // Add categories to the Category drop-down menu
@@ -467,6 +463,32 @@ public class AddItemFragment extends Fragment {
         //String category = selectedCategory;
         String category = tvCategory.getText().toString();
 
+        // Check if the Text boxes are empty
+        if (taskTitle.isEmpty()) {
+            etInputTaskTitle.setError("Title cannot be empty");
+            return;
+        }
+
+        if (tvSelectPatient.getText().toString().isEmpty()) {
+            tvSelectPatient.setError("Patient cannot be empty");
+            return;
+        }
+
+        if (tvInputDate.getText().toString().isEmpty()) {
+            tvInputDate.setError("Date cannot be empty");
+            return;
+        }
+
+        if (tvInputTime.getText().toString().isEmpty()) {
+            tvInputTime.setError("Time cannot be empty");
+            return;
+        }
+
+        if (category.isEmpty()) {
+            tvCategory.setError("Category cannot be empty");
+            return;
+        }
+
         DateString dateString = CalculateDate.getDateFromString(tvInputDate.getText().toString());
         inputYear = dateString.getYear();
         inputMonth = dateString.getMonth();
@@ -486,8 +508,8 @@ public class AddItemFragment extends Fragment {
                     .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                         @Override
                         public void onSuccess(DocumentReference documentReference) {
-                            writeNotification("New item added", taskTitle, taskCollection.getId(), patientId);
-                            Toast.makeText(getActivity(), "Tasked add", Toast.LENGTH_LONG).show();
+                            writeNotification("New activity added", taskTitle, taskCollection.getId(), patientId);
+                            Toast.makeText(getActivity(), "Activity add: " + taskTitle + " on " + tvInputDate.getText(), Toast.LENGTH_LONG).show();
                         }
                     });
         } else {    // update existing task
@@ -509,8 +531,8 @@ public class AddItemFragment extends Fragment {
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
-                            writeNotification("Item updated", taskTitle, documentId, patientId);
-                            Toast.makeText(getActivity(), "Task updated", Toast.LENGTH_LONG).show();
+                            writeNotification("Activity updated", taskTitle, documentId, patientId);
+                            Toast.makeText(getActivity(), "Activity updated: " + taskTitle + " on " + tvInputDate.getText(), Toast.LENGTH_LONG).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
@@ -520,7 +542,7 @@ public class AddItemFragment extends Fragment {
                         }
                     });
         }
-        // Navigate to other Fragment
+        // Redirect to Home Fragment
         HomeFragment homeFragment = new HomeFragment();
         // Use FragmentManager to replace the current fragment with AddItemFragment
         FragmentManager fragmentManager = (getActivity().getSupportFragmentManager());

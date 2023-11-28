@@ -63,9 +63,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity
-            android:name=".WholeListActivity"
-            android:exported="false" />
+
         <activity
             android:name=".SignupActivity"
             android:exported="false" />

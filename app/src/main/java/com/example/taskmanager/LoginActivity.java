@@ -57,6 +57,59 @@ public class LoginActivity extends AppCompatActivity {
         tvSignup = findViewById(R.id.tvSignup);
         tvLoginMsg = findViewById(R.id.tvLoginMsg);
 
+        // get the user information and put it in bundle
+        getUserInfo(context);
+
+        // set login button onClick listener
+        btnLogin.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String userEmail = etLoginEmail.getText().toString();
+                String pass = etLoginPassword.getText().toString();
+
+                if (!userEmail.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
+                    if (!pass.isEmpty()) {
+                        auth.signInWithEmailAndPassword(userEmail, pass)
+                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
+                                    @Override
+                                    public void onSuccess(AuthResult authResult) {
+                                        Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                        //startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
+                                        //startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                        getUserInfo(context);
+                                        finish();
+                                    }
+                                }).addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception e) {
+                                        //Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
+                                        tvLoginMsg.setText("Login Failed. Incorrect password or user does not exist.");
+                                    }
+                                });
+                    } else {
+                        etLoginPassword.setError("Password cannot be empty");
+                    }
+                } else if(userEmail.isEmpty()) {
+                    etLoginEmail.setError("Email cannot be empty");
+                } else {
+                    etLoginEmail.setError("Please enter valid email");
+                }
+            }
+        });
+
+        // set signup textView onClick listener
+        tvSignup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
+            }
+        });
+
+
+    }
+
+    // get user information from Firestore, and put it in bundle and redirect to MainActivity
+    private void getUserInfo(Context context) {
         currentUser = auth.getCurrentUser();
         if (currentUser != null) {
             // if user is already logged in, get the user name and user id
@@ -105,51 +158,5 @@ public class LoginActivity extends AppCompatActivity {
                         }
                     });
         }
-
-        // set login button onClick listener
-        btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String userEmail = etLoginEmail.getText().toString();
-                String pass = etLoginPassword.getText().toString();
-
-                if (!userEmail.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
-                    if (!pass.isEmpty()) {
-                        auth.signInWithEmailAndPassword(userEmail, pass)
-                                .addOnSuccessListener(new OnSuccessListener<AuthResult>() {
-                                    @Override
-                                    public void onSuccess(AuthResult authResult) {
-                                        Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                        //startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
-                                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                                        finish();
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception e) {
-                                        //Toast.makeText(LoginActivity.this, "Login Failed", Toast.LENGTH_SHORT).show();
-                                        tvLoginMsg.setText("Login Failed. Incorrect password or user does not exist.");
-                                    }
-                                });
-                    } else {
-                        etLoginPassword.setError("Password cannot be empty");
-                    }
-                } else if(userEmail.isEmpty()) {
-                    etLoginEmail.setError("Email cannot be empty");
-                } else {
-                    etLoginEmail.setError("Please enter valid email");
-                }
-            }
-        });
-
-        // set signup textView onClick listener
-        tvSignup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(LoginActivity.this, SignupActivity.class));
-            }
-        });
-
-
     }
 }

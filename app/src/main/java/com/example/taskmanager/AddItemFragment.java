@@ -79,6 +79,8 @@ public class AddItemFragment extends Fragment {
 
     ArrayList<UserClass> patientList = new ArrayList<>();  // to store patient list get from Firestore db
     ArrayList<String> patientNameList = new ArrayList<>();  // to store patient name
+
+    Map<String, String> patientMap = new HashMap<>();
     AutoCompleteTextView tvSelectPatient;
     ArrayAdapter<String> patientAdapter;
 
@@ -235,6 +237,7 @@ public class AddItemFragment extends Fragment {
         // get Patient list from Firestore
         // and set the Patient drop-down menu
         if (isUpdate == true || isNewTask == true) {
+
             userCollection
                     .whereEqualTo("userRole", "Patient")
                     .get()
@@ -246,6 +249,12 @@ public class AddItemFragment extends Fragment {
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
                                     patientNameList.add(user.getUserName());
+
+                                    // save patient name and the associated patientId to hash map
+
+                                    for (int i = 0; i <= patientList.size() - 1; i++) {
+                                        patientMap.put(patientList.get(i).getUserName(), patientList.get(i).getUserId());
+                                    }
 
                                     // Add Patient to the Patient drop-down menu
                                     // Use the new dropdown_item_layout.xml for the adapter
@@ -407,9 +416,10 @@ public class AddItemFragment extends Fragment {
                                         String msg = taskDetail.getTaskTitle() + " on " +
                                                         taskDetail.getMonth() + "-" + taskDetail.getDay() + "-" + taskDetail.getYear() +
                                                         "(" + hourString + ":" + minuteString + ")";
-                                        String patientId = patientList.get(selectedPatientIndex).getUserId();
+                                        //String patientId = patientList.get(selectedPatientIndex).getUserId();
+                                        String patientId = patientMap.get(tvSelectPatient.getText().toString());
                                         writeNotification("Activity deleted: ", msg, documentId, patientId);
-                                        Toast.makeText(thisFragmentContext, "Item deleted", Toast.LENGTH_LONG).show();
+                                        Toast.makeText(thisFragmentContext, "Activity deleted" + msg, Toast.LENGTH_LONG).show();
 
                                         // return to Home Fragment
                                         HomeFragment homeFragment = new HomeFragment();
@@ -456,12 +466,18 @@ public class AddItemFragment extends Fragment {
 
         String taskTitle = etInputTaskTitle.getText().toString().trim();
         String doctorId = userId;
-        String patientName = patientList.get(selectedPatientIndex).getUserName();
+        //String patientName = patientList.get(selectedPatientIndex).getUserName();
+        String patientName = tvSelectPatient.getText().toString();
         String patientEmail = patientList.get(selectedPatientIndex).getUserEmail();
-        String patientId = patientList.get(selectedPatientIndex).getUserId();
+        //String patientId = patientList.get(selectedPatientIndex).getUserId();
+
         String description = etInputDescription.getText().toString().trim();
         //String category = selectedCategory;
         String category = tvCategory.getText().toString();
+
+        // use a HashMap to store patient name and its associated patientId
+
+
 
         // Check if the Text boxes are empty
         if (taskTitle.isEmpty()) {
@@ -499,6 +515,8 @@ public class AddItemFragment extends Fragment {
         inputMinute = timeString.getMinute();
         String status = "Pending";
         boolean setAlarm = false;
+
+        String patientId = patientMap.get(tvSelectPatient.getText().toString());
 
         if (isNewTask) {        // create a new task
             TaskClass newTask = new TaskClass(taskTitle, doctorId, patientName, patientEmail, patientId,
@@ -559,6 +577,7 @@ public class AddItemFragment extends Fragment {
         long timeStamp = System.currentTimeMillis(); // Use a timestamp as a unique ID
         MsgClass realtimeMsg = new MsgClass(title, msg, documentId, timeStamp);
         DatabaseReference myRef = realtime_db.getReference(patientId);
+        //Toast.makeText(thisFragmentContext, "write to " + patientId, Toast.LENGTH_SHORT).show();
         myRef.setValue(realtimeMsg);
     }
 }

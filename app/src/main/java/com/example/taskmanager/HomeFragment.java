@@ -227,6 +227,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         }
         else {
             // if the user is a doctor, enable the patient drop-down menu
+            patientList.clear();
+            patientNameList.clear();
             userCollection
                     .whereEqualTo("userRole", "Patient")
                     .get()
@@ -234,7 +236,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                patientNameList.add("All");
+                                //patientNameList.add("All");
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
@@ -253,7 +255,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             selectedPatient = parent.getItemAtPosition(position).toString();
-                                            selectedPatientIndex = position - 1;
+                                            //selectedPatientIndex = position - 1;
+                                            selectedPatientIndex = position;
                                             //Toast.makeText(thisFragmentContext, selectedPatient + ":" + selectedPatientIndex, Toast.LENGTH_SHORT).show();
                                             LoadDataFromDB();
                                             //filterTask(selectedPatient, selectedCategory);

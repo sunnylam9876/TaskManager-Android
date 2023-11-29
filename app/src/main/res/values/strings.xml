@@ -8,4 +8,12 @@
     <string name="fcm_message">fcm_message</string>
     <string name="msg_token_fmt">FCM registration Token: %s</string>
 
+    <string-array name="category">
+        <item>All</item>
+        <item>Appointment</item>
+        <item>Medicine</item>
+        <item>Workout</item>
+        <item>Others</item>
+    </string-array>
+
 </resources>

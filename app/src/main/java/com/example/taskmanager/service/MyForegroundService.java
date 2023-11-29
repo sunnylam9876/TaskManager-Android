@@ -7,6 +7,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothLeAudioCodecStatus;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -23,6 +24,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.taskmanager.CustomerClass.MsgClass;
+import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.LoginActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.TaskList.TaskClass;
@@ -58,6 +60,7 @@ public class MyForegroundService extends Service {
 
     private boolean isServiceStarted = false;
     private boolean isFirstLoad = true;
+    private boolean isFirstLoad_doctor = true;
 
     private FirebaseAuth auth;
     private FirebaseUser currentUser;
@@ -65,10 +68,10 @@ public class MyForegroundService extends Service {
     FirebaseFirestore firestore_db = FirebaseFirestore.getInstance();
     CollectionReference taskCollection = firestore_db.collection("Tasks");  // tasks collection
 
-    private CollectionReference userCollection = firestore_db.collection("Users");
+    CollectionReference userCollection = firestore_db.collection("Users");
 
 
-        public MyForegroundService() {
+    public MyForegroundService() {
     }
 
     @Override
@@ -88,21 +91,22 @@ public class MyForegroundService extends Service {
             Bundle receivedBundle = intent.getExtras();
             userId = receivedBundle.getString("userId");
             userRole = receivedBundle.getString("userRole");
+
+            if (!isServiceStarted) {
+                // Create a notification for the foreground service
+                Notification notification = buildNotification(this, "Task Management App is running", "");
+
+                // Start the service in the foreground with the notification
+                startForeground(SERVICE_NOTIFICATION_ID, notification);
+
+                // Set the flag indicating the service has been started
+                isServiceStarted = true;
+
+                getUserInfo(intent);        // load the user information
+                setupRealTimeDbListener();  // set up realtime database listener
+            }
         }
 
-        if (!isServiceStarted) {
-            // Create a notification for the foreground service
-            Notification notification = buildNotification(this, "Task Management App is running", "");
-
-            // Start the service in the foreground with the notification
-            startForeground(SERVICE_NOTIFICATION_ID, notification);
-
-            // Set the flag indicating the service has been started
-            isServiceStarted = true;
-
-            getUserInfo(intent);
-            setupRealTimeDbListener();
-        }
         return START_STICKY; // Service will be restarted if it's killed by the system
     }
 
@@ -113,8 +117,6 @@ public class MyForegroundService extends Service {
             userRole = receivedBundle.getString("userRole");
         } else {
             if (currentUser != null) {
-                // if user is already logged in, get the user name and user id
-                //get the user Id
                 final String currentUserId = currentUser.getUid();
                 Task<QuerySnapshot> querySnapshotTask = userCollection.whereEqualTo("userId", currentUserId)
                         .get()
@@ -142,15 +144,50 @@ public class MyForegroundService extends Service {
     private void setupRealTimeDbListener() {
         // connection to Firebase Realtime database
         FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = realtime_db.getReference(userId);
+        DatabaseReference myRef;
+        DatabaseReference myRef_doctor;
 
-        // set realtime database event listener
+        /*if (userRole.equals("Doctor")) {
+            myRef = realtime_db.getReference("doctor");
+        } else {
+            myRef = realtime_db.getReference(userId);
+        }*/
+
+        myRef = realtime_db.getReference(userId);
+        Log.d("realtimedb", userId);
+        //myRef_doctor = realtime_db.getReference("doctor");
+
+        // set realtime database event listener for doctor channel, if any update from patient, it will notify the doctor
+        /*myRef_doctor.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                if (isFirstLoad_doctor) {
+                    isFirstLoad_doctor = false; // Set the flag to false after the first load
+                } else {
+                    // send a broadcast msg, the HomeFragment will update the calendar
+                    // once it receive the intent
+                    Intent intent = new Intent("LOAD_DATA_FROM_DB");
+                    sendBroadcast(intent);
+                    //Toast.makeText(MyForegroundService.this, "Update from patient", Toast.LENGTH_SHORT).show();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });*/
+
+        // set realtime database event listener for patient, if any update from the doctor, it will notify the patient
         myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if (isFirstLoad) {
                     isFirstLoad = false; // Set the flag to false after the first load
                 } else {
+                    //.makeText(MyForegroundService.this, "Realtime database triggered", Toast.LENGTH_LONG).show();
+                    //Log.d("realtimedb", "Realtime database onDataChange triggered");
+
                     wakeUpScreen();     // wake up the screen to show notifications
 
                     MsgClass newValue = snapshot.getValue(MsgClass.class);
@@ -161,8 +198,10 @@ public class MyForegroundService extends Service {
                     // once it receive the intent
                     Intent intent = new Intent("LOAD_DATA_FROM_DB");
                     sendBroadcast(intent);
-                    LoadDataInBackground();
-                    //testLoadData();
+
+                    if (userRole.equals("Patient")) {
+                        LoadDataInBackground();     // This will load data in background even if the app is killed
+                    }
                 }
             }
 
@@ -186,9 +225,8 @@ public class MyForegroundService extends Service {
                                 TaskClass eachTask = document.toObject(TaskClass.class);
                                 //eachTask.setId(document.getId());       // To get document id for further update or delete
 
-                                // this part cut out
                                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-                                Intent intent = new Intent(MyForegroundService.this, MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
+                                Intent intent = new Intent(MyForegroundService.this, MyNotificationReceiver.class);
                                 long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
                                 intent.putExtra("msg", eachTask.getTaskTitle());
                                 intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
@@ -197,7 +235,7 @@ public class MyForegroundService extends Service {
                                 Calendar calendar = Calendar.getInstance();
                                 calendar.setTimeInMillis(System.currentTimeMillis());
 
-                                // Set the desired time for the notification (replace with your desired time logic)
+                                // Set the desired time for the notification
                                 calendar.set(Calendar.YEAR, eachTask.getYear());
                                 calendar.set(Calendar.MONTH, eachTask.getMonth() - 1);  //Note: Months are zero-based (0 for January, 1 for February, etc.)
                                 calendar.set(Calendar.DAY_OF_MONTH, eachTask.getDay());
@@ -223,7 +261,7 @@ public class MyForegroundService extends Service {
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
-                                                Toast.makeText(getApplicationContext(), "Alarm set in foreground", Toast.LENGTH_LONG).show();
+                                                //Toast.makeText(getApplicationContext(), "Alarm set in foreground", Toast.LENGTH_LONG).show();
                                             }
                                         })
                                         .addOnFailureListener(new OnFailureListener() {
@@ -305,6 +343,8 @@ public class MyForegroundService extends Service {
     @SuppressLint("MissingPermission")
     private void showFloatingNotification(String title, String msg) {
         // Create an intent to open your app when the notification is tapped
+        //Toast.makeText(this, "In showFloatingNotification()", Toast.LENGTH_LONG).show();
+
         Intent intent = new Intent(this, LoginActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 

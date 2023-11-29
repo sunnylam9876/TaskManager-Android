@@ -118,7 +118,8 @@
                                             android:text=""
                                             android:textColor="@color/black"
                                             android:textColorHint="@color/dark_grey"
-                                            android:textSize="14sp" />
+                                            android:textSize="14sp"
+                                            />
                                 </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
 

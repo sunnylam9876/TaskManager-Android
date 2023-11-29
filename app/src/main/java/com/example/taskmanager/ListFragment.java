@@ -150,6 +150,8 @@ public class ListFragment extends Fragment {
         }
         else {
             // if the user is a doctor, enable the patient drop-down menu
+            patientList.clear();
+            patientNameList.clear();
             userCollection
                     .whereEqualTo("userRole", "Patient")
                     .get()
@@ -157,7 +159,7 @@ public class ListFragment extends Fragment {
                         @Override
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
-                                patientNameList.add("All");
+                                //patientNameList.add("All");
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
@@ -169,7 +171,7 @@ public class ListFragment extends Fragment {
                                     // Specify the layout resource for dropdown items
                                     patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
                                     tvPatientFilter.setAdapter(patientAdapter);
-                                    tvPatientFilter.setAdapter(patientAdapter);
+                                    //tvPatientFilter.setAdapter(patientAdapter);
                                     tvPatientFilter.setText(patientAdapter.getItem(0), false);
 
 
@@ -177,14 +179,9 @@ public class ListFragment extends Fragment {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             selectedPatient = parent.getItemAtPosition(position).toString();
+                                            Toast.makeText(thisFragmentContext, selectedPatient + " : " + selectedCategory, Toast.LENGTH_LONG).show();
                                             filterTask(selectedPatient, selectedCategory);
                                             setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
-                                            /*selectedPatientIndex = position - 1;
-                                            if (selectedPatientIndex == -1)
-                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
-                                            if (selectedPatientIndex >= 0)
-                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + patientList.get(selectedPatientIndex).getUserName() +
-                                                        "; Email: " + patientList.get(selectedPatientIndex).getUserEmail(), Toast.LENGTH_SHORT).show();*/
                                         }
                                     });
                                 }
@@ -201,9 +198,9 @@ public class ListFragment extends Fragment {
 
         // Specify the layout resource for dropdown items
         categoryAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
-        tvCategoryFilter.setAdapter(categoryAdapter);
 
-        tvCategoryFilter.setText(categoryAdapter.getItem(0), false);
+        tvCategoryFilter.setAdapter(categoryAdapter);
+        //tvCategoryFilter.setText(categoryAdapter.getItem(0), false);
         tvCategoryFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

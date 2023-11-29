@@ -40,9 +40,8 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
                 setTheme(R.style.Doctor_Theme);
             }
 
-            if (userRole.equals("Patient")) {
-                // start foreground service if the user is patient
-                // no need to start foreground service for doctor
+            //if (userRole.equals("Patient")) {
+                // start foreground service
                 // pass data to foreground service using bundle
                 Bundle bundle = new Bundle();
                 bundle.putString("userId", userId);
@@ -58,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
                     startService(serviceIntent);
                 }
                 //startService(serviceIntent);
-            }
+            //}
         }
 
         setContentView(R.layout.activity_main);   // disabled since we use view binding

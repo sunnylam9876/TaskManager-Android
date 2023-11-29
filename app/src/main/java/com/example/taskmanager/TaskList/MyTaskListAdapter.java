@@ -21,9 +21,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 
 import com.example.taskmanager.AddItemFragment;
+import com.example.taskmanager.CustomerClass.MsgClass;
 import com.example.taskmanager.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -40,9 +43,9 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
     // 1 - define data sources
     private List<TaskClass> taskList;
-    private Context context;
 
     private String userRole;
+    private Context context;
 
     // constructor
     public MyTaskListAdapter(List<TaskClass> taskList, String userRole, Context context) {
@@ -89,6 +92,11 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         // Assign title, due date and color for the list
         TaskClass eachTask = taskList.get(position);
         holder.ctvComplete.setText(eachTask.getTaskTitle());
+
+/*        if (userRole.equals("Doctor")) {
+            //holder.ctvComplete.setCheckMarkDrawable(android.R.color.transparent); // Hide the checkbox
+            holder.ctvComplete.setEnabled(false);
+        }*/
 
         String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
         String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
@@ -150,6 +158,10 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     // set text style to not strike through
                     holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
+
+
+                    completionNotification();
+
                     if (status.equals("Pending")) {
                         // set the text to red if the task is overdue
                         LocalDate currentDate = LocalDate.now();
@@ -173,6 +185,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     holder.ctvComplete.setTextColor(Color.BLACK);
                     holder.tvTaskListDue.setTextColor(Color.BLACK);
+                    completionNotification();
                     //Toast.makeText(context, "not isChecked", Toast.LENGTH_LONG).show();
                 }
                 int adapterPosition = holder.getAdapterPosition();
@@ -192,7 +205,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                    Toast.makeText(context, "Task updated", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Activity completed", Toast.LENGTH_LONG).show();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -238,6 +251,15 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
             }
         });
 
+    }
+
+    public void completionNotification() {       // update realtime database 'doctor' channel
+        // connection to Firebase Realtime database
+        FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
+        long timeStamp = System.currentTimeMillis(); // Use a timestamp as a unique ID
+        //MsgClass realtimeMsg = new MsgClass(title, msg, documentId, timeStamp);
+        DatabaseReference myRef = realtime_db.getReference("doctor");
+        myRef.setValue(timeStamp);
     }
 
     @Override

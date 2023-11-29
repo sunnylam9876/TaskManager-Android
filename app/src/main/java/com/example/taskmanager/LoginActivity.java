@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -49,6 +51,9 @@ public class LoginActivity extends AppCompatActivity {
 
         Context context = this;
 
+        checkInternetConnection();
+
+
         auth = FirebaseAuth.getInstance();
 
         etLoginEmail = findViewById(R.id.etLoginEmail);
@@ -73,8 +78,6 @@ public class LoginActivity extends AppCompatActivity {
                                     @Override
                                     public void onSuccess(AuthResult authResult) {
                                         Toast.makeText(LoginActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                                        //startActivity(new Intent(LoginActivity.this, DashBoardActivity.class));
-                                        //startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                         getUserInfo(context);
                                         finish();
                                     }
@@ -103,8 +106,8 @@ public class LoginActivity extends AppCompatActivity {
                 startActivity(new Intent(LoginActivity.this, SignupActivity.class));
             }
         });
-    }
-
+    }   //End of onCreate()
+// ----------------------------------------------------------------------------------------------------------------------------------------
     // Get user information and redirect to MainActivity if the user logged in
     private void getUserInfo(Context context) {
         currentUser = auth.getCurrentUser();
@@ -156,5 +159,32 @@ public class LoginActivity extends AppCompatActivity {
                     });
         }
 
+    }   // End of getUserInfo()
+//----------------------------------------------------------------------------------------------------------------------------------------
+    private boolean checkInternetConnection() {
+        // get Connectivity Manager object to check connection
+        ConnectivityManager connec =(ConnectivityManager)getSystemService(getBaseContext().CONNECTIVITY_SERVICE);
+
+        // Check for network connections
+        if ( connec.getNetworkInfo(0).getState() ==
+                android.net.NetworkInfo.State.CONNECTED ||
+                connec.getNetworkInfo(0).getState() ==
+                        android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() ==
+                        android.net.NetworkInfo.State.CONNECTING ||
+                connec.getNetworkInfo(1).getState() == android.net.NetworkInfo.State.CONNECTED ) {
+            //Toast.makeText(this, " Connected ", Toast.LENGTH_LONG).show();
+            return true;
+        }else if (
+                connec.getNetworkInfo(0).getState() ==
+                        android.net.NetworkInfo.State.DISCONNECTED ||
+                        connec.getNetworkInfo(1).getState() ==
+                                android.net.NetworkInfo.State.DISCONNECTED  ) {
+            Toast.makeText(this, "Not connected to Internet. Please check.", Toast.LENGTH_LONG).show();
+            return false;
+        }
+        return false;
     }
+
+
 }

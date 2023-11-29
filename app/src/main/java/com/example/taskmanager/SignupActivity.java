@@ -38,7 +38,7 @@ public class SignupActivity extends AppCompatActivity {
 
     private Context context;
 
-    String[] roles = {"Patient", "Doctor"};
+    String[] roles = {"Patient", "Caregiver"};
     AutoCompleteTextView tvSignupRole;
     ArrayAdapter<String> roleAdapter;
 

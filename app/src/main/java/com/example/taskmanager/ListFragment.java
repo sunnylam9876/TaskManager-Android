@@ -256,7 +256,7 @@ public class ListFragment extends Fragment {
                     //.whereEqualTo("month", month)
                     //.whereEqualTo("day", day)
                     //.whereEqualTo("patientId", patientId)
-                    //.whereEqualTo("status", status)
+                    .whereEqualTo("status", "Pending")
                     .orderBy("year", Query.Direction.ASCENDING)
                     .orderBy("month", Query.Direction.ASCENDING)
                     .orderBy("day", Query.Direction.ASCENDING)
@@ -271,7 +271,7 @@ public class ListFragment extends Fragment {
                     //.whereEqualTo("month", month)
                     //.whereEqualTo("day", day)
                     .whereEqualTo("patientId", patientId)
-                    //.whereEqualTo("status", status)
+                    .whereEqualTo("status", "Pending")
                     .orderBy("year", Query.Direction.ASCENDING)
                     .orderBy("month", Query.Direction.ASCENDING)
                     .orderBy("day", Query.Direction.ASCENDING)      // need to create index in Firestore first, or click the link in the error msg

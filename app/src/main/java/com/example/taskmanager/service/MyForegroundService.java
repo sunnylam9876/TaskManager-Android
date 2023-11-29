@@ -234,7 +234,7 @@ public class MyForegroundService extends Service {
                                         });
                             }
 
-                            Toast.makeText(getApplicationContext(), "OK now", Toast.LENGTH_LONG).show();
+                            //Toast.makeText(getApplicationContext(), "OK now", Toast.LENGTH_LONG).show();
                         } else {
                             // Display the error
                             Toast.makeText(getApplicationContext(), task.getException().toString(), Toast.LENGTH_LONG).show();

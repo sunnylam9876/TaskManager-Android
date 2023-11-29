@@ -23,8 +23,7 @@ public class MyWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
-        //fetchDataFromDb();
-        Log.v(TAG, "Performing long runnign task....");
+        fetchDataFromDb();
         return Result.success();
     }
 

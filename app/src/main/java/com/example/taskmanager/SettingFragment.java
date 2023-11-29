@@ -16,6 +16,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 public class SettingFragment extends Fragment {
 
@@ -40,6 +42,8 @@ public class SettingFragment extends Fragment {
 
     Context thisFragmentContext;
     Button btnSignout;
+
+    Button b1, b2;
 
     //TextView tvMsg;
 
@@ -71,6 +75,61 @@ public class SettingFragment extends Fragment {
 //--------------------------------------------------------------------------------------------------------------------
         btnSignout = view.findViewById(R.id.btnSignout);
 
+        b1 = view.findViewById(R.id.button);
+        b2 = view.findViewById(R.id.button2);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            String channelId = getString(R.string.default_notification_channel_id);
+            String channelName = "myChannelName";
+
+            NotificationManager notificationManager = requireContext().getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH));
+        }
+
+        if (requireActivity().getIntent().getExtras() != null) {
+            for (String key: requireActivity().getIntent().getExtras().keySet()) {
+                Object value = requireActivity().getIntent().getExtras().get(key);
+                Log.d("MyFCM", "Key: " + key + " Value: " + value);
+            }
+        }
+
+        b1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseMessaging.getInstance().subscribeToTopic("weather")
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                               String msg = "Subscribed!";
+                               if (!task.isSuccessful()) {
+                                   msg = "Failed to subscribe";
+                               }
+                               Log.d("MyFCM", msg);
+                                Toast.makeText(thisFragmentContext, msg, Toast.LENGTH_LONG).show();
+                            }
+                        });
+            }
+        });
+
+        b2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
+                    @Override
+                    public void onComplete(@NonNull Task<String> task) {
+                        if (!task.isSuccessful()) {
+                            Log.v("MyFCM", "Failed to register Token", task.getException());
+                            return;
+                        }
+
+                        String token = task.getResult();
+                        String msg = getString(R.string.msg_token_fmt, token);
+                        Log.v("MyFCM", msg);
+                        Toast.makeText(thisFragmentContext, msg, Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        });
 
 
         btnSignout.setOnClickListener(new View.OnClickListener() {

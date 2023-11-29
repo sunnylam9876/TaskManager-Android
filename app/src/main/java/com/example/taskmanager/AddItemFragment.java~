@@ -312,13 +312,15 @@ public class AddItemFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     long defaultDateInMillis;
-                    if (isUpdate && !isNewTask) {
+                    if (isUpdate && !isNewTask) { // get the original date before updating task
                         Calendar calendar = Calendar.getInstance();
-                        calendar.set(taskDetail.getYear(), taskDetail.getMonth() - 1, taskDetail.getDay());
+                        calendar.set(Calendar.YEAR, taskDetail.getYear());
+                        calendar.set(Calendar.MONTH, taskDetail.getMonth() - 1); // Note: Months are zero-based (0 for January, 1 for February, etc.)
+                        calendar.set(Calendar.DAY_OF_MONTH, taskDetail.getDay());
+
                         defaultDateInMillis = calendar.getTimeInMillis();
-                    } else {
+                    } else // if it is a new task, set the date to today
                         defaultDateInMillis = MaterialDatePicker.todayInUtcMilliseconds();
-                    }
 
                     // Set up the Material 3 Date Picker
                     MaterialDatePicker<Long> materialDatePicker = MaterialDatePicker.Builder.datePicker()
@@ -326,19 +328,25 @@ public class AddItemFragment extends Fragment {
                             .setSelection(defaultDateInMillis)
                             .build();
 
-                    materialDatePicker.addOnPositiveButtonClickListener(selection -> {
-                        // Use UTC time zone for date formatting to match the date picker's default behavior
-                        SimpleDateFormat sdf = new SimpleDateFormat("M-dd-yyyy", Locale.getDefault());
-                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-                        String formattedDate = sdf.format(new Date(selection));
-                        tvInputDate.setText(formattedDate);
+                    materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
+                        @Override
+                        public void onPositiveButtonClick(Long selection) {
+                            // Adjust for the timezone offset
+                            Calendar calendar = Calendar.getInstance();
+                            TimeZone timeZone = calendar.getTimeZone();
+                            int offsetInMillis = timeZone.getOffset(selection);
+                            selection += offsetInMillis;
+
+                            // Handle the selected date
+                            String date = new SimpleDateFormat("M-dd-yyyy", Locale.getDefault()).format(new Date(selection));
+                            tvInputDate.setText(date);
+                        }
                     });
 
                     // Show the Material 3 Date Picker
                     materialDatePicker.show(getActivity().getSupportFragmentManager(), "tag");
                 }
             });
-
 
             //Toast.makeText(thisFragmentContext, inputYear + "-" + inputMonth + "-" + inputDay, Toast.LENGTH_LONG).show();
         }

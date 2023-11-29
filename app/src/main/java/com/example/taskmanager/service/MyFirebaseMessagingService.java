@@ -26,7 +26,7 @@ import com.google.firebase.messaging.RemoteMessage;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
-    private static final String TAG = "MyFirebaseMsgService";
+    private static final String TAG = "MyFCM";
 
     public void onTokenRefresh() {
         FirebaseMessaging.getInstance().getToken()
@@ -40,7 +40,6 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
                         // Get new FCM registration token
                         String token_id = task.getResult();
-
                     }
                 });
     }
@@ -63,6 +62,7 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         // check for notification payload in the message
         if (message.getNotification() != null) {
             Log.v(TAG, "Message Notification Body: " + message.getNotification().getBody());
+            sendNotification(message.getNotification().getBody());
         }
     }
     @Override
@@ -111,6 +111,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         }
         notificationManager.notify(0, notificationBuilder.build());
     }
-
-
 }

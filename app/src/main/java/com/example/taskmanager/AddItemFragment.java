@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.TimeZone;
 
 public class AddItemFragment extends Fragment {
     Context thisFragmentContext, context;
@@ -290,43 +291,33 @@ public class AddItemFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     long defaultDateInMillis;
-                    if (isUpdate && !isNewTask) {     // get the original date before updating task
+                    if (isUpdate && !isNewTask) {
                         Calendar calendar = Calendar.getInstance();
-                        calendar.set(Calendar.YEAR, taskDetail.getYear());
-                        calendar.set(Calendar.MONTH, taskDetail.getMonth() - 1);    //Note: Months are zero-based (0 for January, 1 for February, etc.)
-                        calendar.set(Calendar.DAY_OF_MONTH, taskDetail.getDay());
-
+                        calendar.set(taskDetail.getYear(), taskDetail.getMonth() - 1, taskDetail.getDay());
                         defaultDateInMillis = calendar.getTimeInMillis();
-                    } else  // if it is a new task, set the date to today
+                    } else {
                         defaultDateInMillis = MaterialDatePicker.todayInUtcMilliseconds();
+                    }
 
-                    // set the date picker
+                    // Set up the Material 3 Date Picker
                     MaterialDatePicker<Long> materialDatePicker = MaterialDatePicker.Builder.datePicker()
                             .setTitleText("Select Date")
                             .setSelection(defaultDateInMillis)
                             .build();
-                    materialDatePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-                        @Override
-                        public void onPositiveButtonClick(Long selection) {
-                            String date = new SimpleDateFormat("M-dd-yyyy", Locale.getDefault()).format(new Date(selection));
-                            tvInputDate.setText(date);
 
-                            // Convert the selected timestamp to Calendar type
-                            //Calendar calendar = Calendar.getInstance();
-                            //calendar.setTimeInMillis(selection);
-
-                            // Extract month, day, and year values
-                            //inputYear = calendar.get(Calendar.YEAR);
-                            //inputMonth = calendar.get(Calendar.MONTH) + 1; // Calendar months are 0-based
-                            //inputDay = calendar.get(Calendar.DAY_OF_MONTH);
-
-                            //Toast.makeText(thisFragmentContext, inputYear + "-" + inputMonth + "-" + inputDay, Toast.LENGTH_LONG).show();
-                        }
+                    materialDatePicker.addOnPositiveButtonClickListener(selection -> {
+                        // Use UTC time zone for date formatting to match the date picker's default behavior
+                        SimpleDateFormat sdf = new SimpleDateFormat("M-dd-yyyy", Locale.getDefault());
+                        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+                        String formattedDate = sdf.format(new Date(selection));
+                        tvInputDate.setText(formattedDate);
                     });
+
+                    // Show the Material 3 Date Picker
                     materialDatePicker.show(getActivity().getSupportFragmentManager(), "tag");
                 }
             });
-
+            //Toast.makeText(thisFragmentContext, inputYear + "-" + inputMonth + "-" + inputDay, Toast.LENGTH_LONG).show();
         }
 
 //------------------------------------------------------------------

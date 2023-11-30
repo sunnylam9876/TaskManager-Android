@@ -1,4 +1,4 @@
-package com.example.taskmanager.service;
+package com.example.taskmanager.Service;
 
 import android.annotation.SuppressLint;
 import android.app.AlarmManager;
@@ -7,7 +7,6 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.bluetooth.BluetoothLeAudioCodecStatus;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -24,7 +23,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.taskmanager.CustomerClass.MsgClass;
-import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.LoginActivity;
 import com.example.taskmanager.R;
 import com.example.taskmanager.TaskList.TaskClass;
@@ -46,7 +44,6 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;

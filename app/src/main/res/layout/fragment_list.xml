@@ -29,25 +29,85 @@
                             android:textSize="20sp"
                             android:textStyle="bold" />
 
-                        <EditText
-                            android:id="@+id/etSearch"
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/txtInputPatient"
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                             android:layout_width="match_parent"
-                            android:layout_height="55sp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="8dp"
+
+                            android:layout_marginBottom="5dp"
+                            android:layout_weight="1"
+                            android:background="@drawable/background_edittext"
+                            android:focusable="false"
+                            android:outlineProvider="none"
+                            app:boxStrokeColor="@android:color/transparent"
+                            app:boxStrokeWidth="0dp">
+
+                                <AutoCompleteTextView
+                                    android:id="@+id/tvHomePatientFilter"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@android:color/transparent"
+                                    android:drawableStart="@drawable/baseline_group_24"
+                                    android:drawablePadding="10dp"
+                                    android:hint="Patient"
+                                    android:inputType="none"
+                                    android:padding="5dp"
+                                    android:text=""
+                                    android:textColor="@color/black"
+                                    android:textColorHint="@color/dark_grey"
+                                    android:textSize="14sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="8dp"
+                            android:layout_marginTop="5dp"
+                            android:layout_marginRight="8dp"
+                            android:layout_marginBottom="5dp"
+
+                            android:layout_weight="1"
+                            android:background="@drawable/background_edittext"
+                            android:focusable="false"
+                            android:outlineProvider="none"
+                            app:boxStrokeColor="@android:color/transparent"
+                            app:boxStrokeWidth="0dp">
+
+                                <AutoCompleteTextView
+                                    android:id="@+id/tvCategoryFilter"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:background="@android:color/transparent"
+                                    android:drawableStart="@drawable/baseline_category_24"
+                                    android:drawablePadding="10dp"
+                                    android:hint="Category"
+                                    android:inputType="none"
+                                    android:padding="5dp"
+                                    android:text=""
+                                    android:textColor="@color/black"
+                                    android:textColorHint="@color/dark_grey"
+                                    android:textSize="14sp" />
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <SearchView
+                            android:id="@+id/searchView"
+                            style="@android:style/Widget.Material.SearchView"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
                             android:layout_marginStart="8dp"
-                            android:layout_marginTop="16dp"
+                            android:layout_marginTop="5dp"
                             android:layout_marginEnd="8dp"
                             android:layout_marginBottom="3dp"
                             android:background="@drawable/background_edittext"
-                            android:drawableStart="@drawable/baseline_search_24"
-                            android:drawablePadding="10dp"
-                            android:ems="10"
-                            android:hint="Search by activity"
-                            android:imeOptions="actionSearch"
-                            android:inputType="text"
-                            android:padding="16dp"
-                            android:text=""
-                            android:textColor="@color/black"
-                            android:textColorHint="@color/dark_grey" />
+                            android:iconifiedByDefault="false"
+                            android:queryHint="Search by activity" />
 
                         <LinearLayout
                             android:layout_width="match_parent"
@@ -56,71 +116,6 @@
                             android:orientation="horizontal">
 
 
-                                <com.google.android.material.textfield.TextInputLayout
-                                    android:id="@+id/txtInputPatient"
-                                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="wrap_content"
-                                    android:layout_marginLeft="8dp"
-                                    android:layout_marginTop="5dp"
-                                    android:layout_marginRight="8dp"
-
-                                    android:layout_marginBottom="5dp"
-                                    android:layout_weight="4"
-                                    android:background="@drawable/background_edittext"
-                                    android:focusable="false"
-                                    android:outlineProvider="none"
-                                    app:boxStrokeColor="@android:color/transparent"
-                                    app:boxStrokeWidth="0dp">
-
-                                        <AutoCompleteTextView
-                                            android:id="@+id/tvHomePatientFilter"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-                                            android:background="@android:color/transparent"
-                                            android:drawableStart="@drawable/baseline_group_24"
-                                            android:drawablePadding="10dp"
-                                            android:hint="Patient"
-                                            android:inputType="none"
-                                            android:padding="5dp"
-                                            android:text=""
-                                            android:textColor="@color/black"
-                                            android:textColorHint="@color/dark_grey"
-                                            android:textSize="14sp" />
-                                </com.google.android.material.textfield.TextInputLayout>
-
-                                <com.google.android.material.textfield.TextInputLayout
-                                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                                    android:layout_width="match_parent"
-                                    android:layout_height="match_parent"
-                                    android:layout_marginLeft="8dp"
-                                    android:layout_marginTop="5dp"
-                                    android:layout_marginRight="8dp"
-                                    android:layout_marginBottom="5dp"
-
-                                    android:layout_weight="3"
-                                    android:background="@drawable/background_edittext"
-                                    android:focusable="false"
-                                    android:outlineProvider="none"
-                                    app:boxStrokeColor="@android:color/transparent"
-                                    app:boxStrokeWidth="0dp">
-
-                                        <AutoCompleteTextView
-                                            android:id="@+id/tvCategoryFilter"
-                                            android:layout_width="match_parent"
-                                            android:layout_height="wrap_content"
-                                            android:background="@android:color/transparent"
-                                            android:drawableStart="@drawable/baseline_category_24"
-                                            android:drawablePadding="10dp"
-                                            android:hint="Category"
-                                            android:inputType="none"
-                                            android:padding="5dp"
-                                            android:text=""
-                                            android:textColor="@color/black"
-                                            android:textColorHint="@color/dark_grey"
-                                            android:textSize="14sp"
-                                            />
-                                </com.google.android.material.textfield.TextInputLayout>
                         </LinearLayout>
 
                         <LinearLayout

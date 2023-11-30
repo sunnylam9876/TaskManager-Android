@@ -1,4 +1,4 @@
-package com.example.taskmanager.service;
+package com.example.taskmanager.Service;
 
 import android.annotation.SuppressLint;
 import android.app.Notification;
@@ -9,13 +9,11 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.widget.Toast;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.example.taskmanager.MainActivity;
-import com.example.taskmanager.NotificationDetails;
 import com.example.taskmanager.R;
 
 public class MyNotificationReceiver extends BroadcastReceiver {

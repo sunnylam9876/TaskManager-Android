@@ -1,4 +1,4 @@
-package com.example.taskmanager.service;
+package com.example.taskmanager.Service;
 
 import android.app.Service;
 import android.content.Intent;

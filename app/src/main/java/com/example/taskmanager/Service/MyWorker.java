@@ -1,10 +1,9 @@
-package com.example.taskmanager.service;
+package com.example.taskmanager.Service;
 
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.work.ListenableWorker;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 

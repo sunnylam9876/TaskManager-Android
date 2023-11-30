@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -75,7 +76,9 @@ public class ListFragment extends Fragment {
     ArrayList<String> patientNameList = new ArrayList<>();  // to store patient name
     ArrayAdapter<String> patientAdapter;
     String selectedPatient = "All";
-    int selectedPatientIndex;
+
+    String selectedPatientId;
+    String selectedItemFromSavedPreference;
 //--------------------------------------------------------------------------------------------------------------------
     // Setup Category drop-down menu
     String[] categories = {"All", "Appointment", "Medicine", "Workout", "Others"};
@@ -116,8 +119,16 @@ public class ListFragment extends Fragment {
         thisFragmentContext = requireContext();
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
+        context = getContext();
+        // To restore the Patient Filter
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+            selectedPatient = sharedPreferences.getString("selectedPatient", ""); // default value as empty string
+            selectedPatientId = sharedPreferences.getString("selectedPatientId", "");
+        }
+
         rvList = view.findViewById(R.id.rvList);
-        tvPatientFilter = view.findViewById(R.id.tvHomePatientFilter);
+        tvPatientFilter = view.findViewById(R.id.tvPatientFilter);
         tvCategoryFilter = view.findViewById(R.id.tvCategoryFilter);
 
         searchView = view.findViewById(R.id.searchView);
@@ -133,7 +144,6 @@ public class ListFragment extends Fragment {
         if (bundle != null) {
             userId = bundle.getString("userId");
             userName = bundle.getString("userName");
-            //userEmail = bundle.getString("userEmail");
             userRole = bundle.getString("userRole");
             if (userRole.equals("Doctor"))
                 selectable = true;
@@ -174,14 +184,23 @@ public class ListFragment extends Fragment {
                                     patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
                                     tvPatientFilter.setAdapter(patientAdapter);
                                     //tvPatientFilter.setAdapter(patientAdapter);
-                                    tvPatientFilter.setText(patientAdapter.getItem(0), false);
+                                    //tvPatientFilter.setText(patientAdapter.getItem(0), false);
+                                    /*if (selectedItemFromSavedPreference != null) {
+                                        tvPatientFilter.setText(selectedItemFromSavedPreference, false);
+                                    }*/
 
+                                    if (selectedPatient != null || !selectedPatient.equals("")) {
+                                        tvPatientFilter.setText(selectedPatient, false);
+                                    } else
+                                        tvPatientFilter.setText(patientAdapter.getItem(0), false);
+
+                                    //LoadDataFromDB();
 
                                     tvPatientFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             selectedPatient = parent.getItemAtPosition(position).toString();
-                                            Toast.makeText(thisFragmentContext, selectedPatient + " : " + selectedCategory, Toast.LENGTH_LONG).show();
+                                            //Toast.makeText(thisFragmentContext, selectedPatient + " : " + selectedCategory, Toast.LENGTH_LONG).show();
                                             filterTask(selectedPatient, selectedCategory);
                                             setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
                                         }
@@ -237,9 +256,6 @@ public class ListFragment extends Fragment {
         return view;
     }
 //--------------------------------------------------------------------------------------------------------------------
-
-
-
 
     private void LoadDataFromDB() {
         // Load all data for the logged-in user

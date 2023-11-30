@@ -70,7 +70,7 @@
                     android:background="@android:color/transparent"
                     android:drawableStart="@drawable/baseline_group_24"
                     android:drawablePadding="10dp"
-                    android:hint="Patient"
+                    android:hint="Care recipient "
                     android:inputType="none"
                     android:padding="16dp"
                     android:text=""

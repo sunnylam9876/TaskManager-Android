@@ -46,6 +46,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MyForegroundService extends Service {
@@ -91,7 +92,7 @@ public class MyForegroundService extends Service {
 
             if (!isServiceStarted) {
                 // Create a notification for the foreground service
-                Notification notification = buildNotification(this, "Task Management App is running", "");
+                Notification notification = buildNotification(this, "Caregiver App is running", "");
 
                 // Start the service in the foreground with the notification
                 startForeground(SERVICE_NOTIFICATION_ID, notification);
@@ -152,28 +153,6 @@ public class MyForegroundService extends Service {
 
         myRef = realtime_db.getReference(userId);
         Log.d("realtimedb", userId);
-        //myRef_doctor = realtime_db.getReference("doctor");
-
-        // set realtime database event listener for doctor channel, if any update from patient, it will notify the doctor
-        /*myRef_doctor.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                if (isFirstLoad_doctor) {
-                    isFirstLoad_doctor = false; // Set the flag to false after the first load
-                } else {
-                    // send a broadcast msg, the HomeFragment will update the calendar
-                    // once it receive the intent
-                    Intent intent = new Intent("LOAD_DATA_FROM_DB");
-                    sendBroadcast(intent);
-                    //Toast.makeText(MyForegroundService.this, "Update from patient", Toast.LENGTH_SHORT).show();
-                }
-            }
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
 
         // set realtime database event listener for patient, if any update from the doctor, it will notify the patient
         myRef.addValueEventListener(new ValueEventListener() {
@@ -202,6 +181,7 @@ public class MyForegroundService extends Service {
                 }
             }
 
+            // Load data and set alarm to new activity
             private void LoadDataInBackground() {
 
                 //ArrayList<TaskClass> taskList = new ArrayList<>();
@@ -225,8 +205,16 @@ public class MyForegroundService extends Service {
                                 AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
                                 Intent intent = new Intent(MyForegroundService.this, MyNotificationReceiver.class);
                                 long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
-                                intent.putExtra("msg", eachTask.getTaskTitle());
-                                intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
+
+                                Bundle bundle = new Bundle();
+                                bundle.putString("msg_title", eachTask.getTaskTitle());
+                                bundle.putString("msg_description", eachTask.getDescription());
+                                bundle.putString("msg_category", eachTask.getCategory());
+                                String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
+                                String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
+                                bundle.putString("msg_time", hourString + ":" + minuteString);
+                                bundle.putInt("notification_id", (int) notificationId); // Use a unique ID for each notification
+                                intent.putExtras(bundle);
 
                                 PendingIntent pendingIntent = PendingIntent.getBroadcast(MyForegroundService.this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                                 Calendar calendar = Calendar.getInstance();

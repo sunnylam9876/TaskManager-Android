@@ -31,8 +31,6 @@ public class SettingFragment extends Fragment {
     Context thisFragmentContext;
     Button btnSignout;
 
-    Button b1, b2;
-
     //TextView tvMsg;
 
     // Initialize Firebase Authentication
@@ -63,10 +61,7 @@ public class SettingFragment extends Fragment {
 //--------------------------------------------------------------------------------------------------------------------
         btnSignout = view.findViewById(R.id.btnSignout);
 
-        b1 = view.findViewById(R.id.button);
-        b2 = view.findViewById(R.id.button2);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             String channelId = getString(R.string.default_notification_channel_id);
             String channelName = "myChannelName";
 
@@ -79,46 +74,7 @@ public class SettingFragment extends Fragment {
                 Object value = requireActivity().getIntent().getExtras().get(key);
                 Log.d("MyFCM", "Key: " + key + " Value: " + value);
             }
-        }
-
-        b1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseMessaging.getInstance().subscribeToTopic("weather")
-                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                            @Override
-                            public void onComplete(@NonNull Task<Void> task) {
-                               String msg = "Subscribed!";
-                               if (!task.isSuccessful()) {
-                                   msg = "Failed to subscribe";
-                               }
-                               Log.d("MyFCM", msg);
-                                Toast.makeText(thisFragmentContext, msg, Toast.LENGTH_LONG).show();
-                            }
-                        });
-            }
-        });
-
-        b2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FirebaseMessaging.getInstance().getToken().addOnCompleteListener(new OnCompleteListener<String>() {
-                    @Override
-                    public void onComplete(@NonNull Task<String> task) {
-                        if (!task.isSuccessful()) {
-                            Log.v("MyFCM", "Failed to register Token", task.getException());
-                            return;
-                        }
-
-                        String token = task.getResult();
-                        String msg = getString(R.string.msg_token_fmt, token);
-                        Log.v("MyFCM", msg);
-                        Toast.makeText(thisFragmentContext, msg, Toast.LENGTH_LONG).show();
-                    }
-                });
-            }
-        });
-
+        }*/
 
         btnSignout.setOnClickListener(new View.OnClickListener() {
             @Override

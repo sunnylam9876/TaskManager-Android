@@ -11,6 +11,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -59,6 +60,7 @@ import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 
@@ -108,11 +110,18 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
     ArrayList<UserClass> patientList = new ArrayList<>();  // to store patient list get from Firestore db
     ArrayList<String> patientNameList = new ArrayList<>();  // to store patient name
     ArrayAdapter<String> patientAdapter;
-    String selectedPatient = "All";
-    int selectedPatientIndex;
+
+    Map<String, String> patientMap = new HashMap<>();
+
+    String selectedPatient;
+
     String selectedPatientId;
+
+    String selectedPatientFromSavedPreference,selectedPatientIdFromSavedPreference;
     AutoCompleteTextView tvHomePatientFilter;
     boolean selectable = false;      // indicate whether the Patient drop-down menu is selectable or not
+
+
 //--------------------------------------------------------------------------------------------------------------------
 
     // connection to Firebase Realtime database
@@ -128,6 +137,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 //------------------------------------------------------------------
     // this part is to receive message from the foreground service
     // once receive foreground service call, LoadDataFromDB() will be triggered to update data
+    // however, this part cannot be executed if the app was killed
     private BroadcastReceiver dataUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -145,21 +155,46 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         requireContext().registerReceiver(dataUpdateReceiver, filter);
     }
 
-    @Override
+
+//-----------------------------------------------------------------------------------------------------------
+    // If the user click a button and navigate to other fragments, when the user return to this fragment,
+    // the selected item in the Patient filter was gone.
+    // To solve this problem, the item name will be saved before switching to other fragments
+    // Th item can be restored in onCreateView()
+
+
     public void onPause() {
         super.onPause();
-        requireContext().unregisterReceiver(dataUpdateReceiver);
+        //saveSelectedItem(getContext(), autoCompleteTextView.getText().toString());
+        /*String selectedItemPatient = tvHomePatientFilter.getText().toString();
+        String selectedItemPatientId = patientMap.get(tvHomePatientFilter.getText().toString());
+        SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("selectedItemPatient", selectedItemPatient);
+        editor.putString("selectedItemPatientId", selectedItemPatientId);
+        editor.apply();*/
     }
-//------------------------------------------------------------------
+
+    //-----------------------------------------------------------------------------------------------------------
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         thisFragmentContext = requireContext();
-
+        context = getContext();
 
         // Inflate the layout for this fragment
         view = inflater.inflate(R.layout.fragment_home, container, false);
+
+        // To restore the Patient Filter
+        selectedPatient = "";
+        selectedPatientId = "";
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+            selectedPatient = sharedPreferences.getString("selectedPatient", ""); // default value as empty string
+            selectedPatientId = sharedPreferences.getString("selectedPatientId", "");
+        }
+
 
         btnAdd = view.findViewById(R.id.btnAdd);
         tvFwd = view.findViewById(R.id.tvFwd);
@@ -219,6 +254,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             // if the user is a doctor, enable the patient drop-down menu
             patientList.clear();
             patientNameList.clear();
+
             userCollection
                     .whereEqualTo("userRole", "Patient")
                     .get()
@@ -231,6 +267,13 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
                                     patientNameList.add(user.getUserName());
+
+                                    // save patient name and the associated patientId to hash map
+
+                                    for (int i = 0; i <= patientList.size() - 1; i++) {
+                                        patientMap.put(patientList.get(i).getUserName(), patientList.get(i).getUserId());
+                                    }
+
                                     // Add Patient to the Patient drop-down menu
                                     // Use the new dropdown_item_layout.xml for the adapter
                                     patientAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);
@@ -238,25 +281,29 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                     // Specify the layout resource for dropdown items
                                     patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
                                     tvHomePatientFilter.setAdapter(patientAdapter);
-                                    tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
+                                    //tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
+                                    if (selectedPatient != null || !selectedPatient.equals("")) {
+                                        tvHomePatientFilter.setText(selectedPatient, false);
+                                    } else
+                                        tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
 
+                                    //LoadDataFromDB();
 
                                     tvHomePatientFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                            selectedPatient = parent.getItemAtPosition(position).toString();
-                                            //selectedPatientIndex = position - 1;
-                                            selectedPatientIndex = position;
-                                            //Toast.makeText(thisFragmentContext, selectedPatient + ":" + selectedPatientIndex, Toast.LENGTH_SHORT).show();
+                                            String patient = parent.getItemAtPosition(position).toString();
+                                            String patientId = patientMap.get(tvHomePatientFilter.getText().toString());
+
+                                            //String selectedItem = tvHomePatientFilter.getText().toString();
+                                            //String selectedPatientId = patientMap.get(tvHomePatientFilter.getText().toString());
+                                            SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+                                            SharedPreferences.Editor editor = sharedPreferences.edit();
+                                            editor.putString("selectedPatient", patient);
+                                            editor.putString("selectedPatientId", patientId);
+                                            editor.apply();
+
                                             LoadDataFromDB();
-                                            //filterTask(selectedPatient, selectedCategory);
-                                            //setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
-                                            /*selectedPatientIndex = position - 1;
-                                            if (selectedPatientIndex == -1)
-                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + parent.getItemAtPosition(position).toString(), Toast.LENGTH_SHORT).show();
-                                            if (selectedPatientIndex >= 0)
-                                                Toast.makeText(thisFragmentContext, "Position: " + selectedPatientIndex + "; Name: " + patientList.get(selectedPatientIndex).getUserName() +
-                                                        "; Email: " + patientList.get(selectedPatientIndex).getUserEmail(), Toast.LENGTH_SHORT).show();*/
                                         }
                                     });
                                 }
@@ -265,6 +312,8 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                             }
                         }
                     });
+            //patientDbReady = true;
+
         }
 //--------------------------------------------------------------------------------------------------------------------
         //set calendar
@@ -275,6 +324,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
         selectedDate = LocalDate.now();
         //setMonthView();
+
 
         LoadDataFromDB();   // load data from Firestore
 
@@ -299,9 +349,18 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
             @Override
             public void onClick(View v) {
                 // Create a bundle to pass task details to other Fragment
+                String dateString;
+                if (clickedDate == null) {
+                    dateString = CalculateDate.monthFromDate(selectedDate) + "-"
+                            + dayFromDate(selectedDate) + "-"
+                            + CalculateDate.yearFromDate(selectedDate);
+                } else {
+                    dateString = clickedDate;
+                }
+
                 Bundle bundle = new Bundle();
-                bundle.putString("clickedDate", clickedDate);
-                bundle.putString("selectedPatient", selectedPatient);
+                bundle.putString("clickedDate", dateString);
+                bundle.putString("selectedPatient", tvHomePatientFilter.getText().toString());
                 bundle.putString("newOrUpdate", "new");
 
                 // Navigate to other Fragment
@@ -317,21 +376,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 transaction.commit();
             }
         });
-
-        //------------------------------------------------------------------
-        //set Task List
-
-        //setTaskList();
-
-        //------------------------------------------------------------------
-
-        //createNotificationChannel();
-        //scheduleNotification();
-        //writeRealTimeDb();
-
-        // start Foreground service
-        //Intent serviceIntent = new Intent(requireContext(), MyForegroundService.class);
-        //thisFragmentContext.startService(serviceIntent);
 
         return view;
     }
@@ -462,9 +506,15 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         int year = selectedDate.getYear();
         int month = selectedDate.getMonthValue();
         int day = selectedDate.getDayOfMonth();
-        //String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
-        String patientId = userId;
+
+
+        //selectedPatientId = patientMap.get(tvHomePatientFilter.getText().toString());
         //String status = "Pending";
+        if (context != null) {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+            selectedPatient = sharedPreferences.getString("selectedPatient", ""); // default value as empty string
+            selectedPatientId = sharedPreferences.getString("selectedPatientId", "");
+        }
 
 
         // Clear the lists first
@@ -474,35 +524,23 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
         Query query;
 
         if (userRole.equals("Doctor")) {    //doctor can see all the data
-            // need to create index in Firestore first, click the link in the error msg
-            if (selectedPatient.equals("All")) {
                 query = taskCollection
                         .whereEqualTo("year", year)
                         .whereEqualTo("month", month)
                         //.whereEqualTo("day", day)
-                        //.whereEqualTo("patientId", patientId)
+                        //.whereEqualTo("patientId", patientList.get(selectedPatientIndex).getUserId())
+                        .whereEqualTo("patientId", selectedPatientId)
                         //.whereEqualTo("status", status)
                         .orderBy("day", Query.Direction.ASCENDING)
                         .orderBy("hour", Query.Direction.ASCENDING)
                         .orderBy("minute", Query.Direction.ASCENDING);
                 //.orderBy("day");
                 //.whereEqualTo("category", category);
-            } else {    // if specific patient was selected in the Patient drop-down menu
-                query = taskCollection
-                        .whereEqualTo("year", year)
-                        .whereEqualTo("month", month)
-                        //.whereEqualTo("day", day)
-                        .whereEqualTo("patientId", patientList.get(selectedPatientIndex).getUserId())
-                        //.whereEqualTo("status", status)
-                        .orderBy("day", Query.Direction.ASCENDING)
-                        .orderBy("hour", Query.Direction.ASCENDING)
-                        .orderBy("minute", Query.Direction.ASCENDING);
-                //.orderBy("day");
-                //.whereEqualTo("category", category);
-            }
+
 
         } else {    // if the role is a patient, who can only view their own data
             // need to create index in Firestore first, click the link in the error msg
+            String patientId = userId;
             query = taskCollection
                     .whereEqualTo("year", year)
                     .whereEqualTo("month", month)
@@ -586,8 +624,19 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                 AlarmManager alarmManager = (AlarmManager) requireContext().getSystemService(Context.ALARM_SERVICE);
                 Intent intent = new Intent(requireContext(), MyNotificationReceiver.class); // Replace with your BroadcastReceiver class
                 long notificationId = System.currentTimeMillis(); // Use a timestamp as a unique ID
-                intent.putExtra("msg", eachTask.getTaskTitle());
-                intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification
+
+                Bundle bundle = new Bundle();
+                bundle.putString("msg_title", eachTask.getTaskTitle());
+                bundle.putString("msg_description", eachTask.getDescription());
+                bundle.putString("msg_category", eachTask.getCategory());
+                String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
+                String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
+                bundle.putString("msg_time", hourString + ":" + minuteString);
+                bundle.putInt("notification_id", (int) notificationId); // Use a unique ID for each notification
+                intent.putExtras(bundle);
+
+               /* intent.putExtra("msg", eachTask.getTaskTitle());
+                intent.putExtra("notification_id", (int) notificationId); // Use a unique ID for each notification*/
 
                 PendingIntent pendingIntent = PendingIntent.getBroadcast(requireContext(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
 
@@ -608,13 +657,6 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
 
                 // Set the alarm using setAlarmClock()
                 alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
-
-                // Schedule alarm
-                /*if (alarmManager != null) {
-                    //alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                    alarmManager.setAlarmClock(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                    //Toast.makeText(thisFragmentContext, "notification scheduled", Toast.LENGTH_SHORT).show();
-                }*/
 
                 //update the field in database
                 eachTask.setSetAlarm(true);     // mark the field to indicate alarm was set for this task

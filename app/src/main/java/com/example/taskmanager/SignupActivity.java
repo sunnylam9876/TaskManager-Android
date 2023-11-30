@@ -38,7 +38,7 @@ public class SignupActivity extends AppCompatActivity {
 
     private Context context;
 
-    String[] roles = {"Patient", "Caregiver"};
+    String[] roles = {"Care recipient", "Caregiver"};
     AutoCompleteTextView tvSignupRole;
     ArrayAdapter<String> roleAdapter;
 
@@ -78,7 +78,12 @@ public class SignupActivity extends AppCompatActivity {
                 String userName = etSignupName.getText().toString().trim();
                 String userEmail = etSignupEmail.getText().toString().trim();
                 String pass = etSignupPassword.getText().toString().trim();
-                String userRole = tvSignupRole.getText().toString();
+                String userRole_temp = tvSignupRole.getText().toString();
+                String userRole;
+                if (userRole_temp.equals("Caregiver"))
+                    userRole = "Doctor";
+                else
+                    userRole = "Patient";
 
                 //clear previous error msg
                 tvSignupMsg.setText("");

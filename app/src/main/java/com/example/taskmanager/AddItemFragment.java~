@@ -538,11 +538,10 @@ public class AddItemFragment extends Fragment {
             taskCollection.document(documentId)
                     .update(updatedData)
                     .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        String msg = taskTitle + " on " + tvInputDate.getText();
                         @Override
                         public void onSuccess(Void unused) {
-                            writeNotification("Activity updated", msg, documentId, patientId);
-                            Toast.makeText(getActivity(), "Activity updated: " + msg, Toast.LENGTH_LONG).show();
+                            writeNotification("Activity updated", taskTitle, documentId, patientId);
+                            Toast.makeText(getActivity(), "Activity updated: " + taskTitle + " on " + tvInputDate.getText(), Toast.LENGTH_LONG).show();
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {

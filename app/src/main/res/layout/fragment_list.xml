@@ -47,14 +47,14 @@
                             app:boxStrokeWidth="0dp">
 
                                 <AutoCompleteTextView
-                                    android:id="@+id/tvHomePatientFilter"
+                                    android:id="@+id/tvPatientFilter"
                                     android:layout_width="match_parent"
                                     android:layout_height="wrap_content"
                                     android:layout_weight="1"
                                     android:background="@android:color/transparent"
                                     android:drawableStart="@drawable/baseline_group_24"
                                     android:drawablePadding="10dp"
-                                    android:hint="Patient"
+                                    android:hint="Care recipient "
                                     android:inputType="none"
                                     android:padding="5dp"
                                     android:text=""

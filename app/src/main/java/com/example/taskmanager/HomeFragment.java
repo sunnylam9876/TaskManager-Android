@@ -6,18 +6,14 @@ import static com.example.taskmanager.Utility.CalculateDate.monthYearFromDate;
 import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
 
 import android.app.AlarmManager;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -34,34 +30,28 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.DateClass;
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
-import com.example.taskmanager.CustomerClass.MsgClass;
 import com.example.taskmanager.CustomerClass.UserClass;
 import com.example.taskmanager.TaskList.MyTaskListAdapter;
 import com.example.taskmanager.TaskList.TaskCategoryClass;
 import com.example.taskmanager.TaskList.TaskClass;
 import com.example.taskmanager.Utility.CalculateDate;
-import com.example.taskmanager.service.MyForegroundService;
-import com.example.taskmanager.service.MyNotificationReceiver;
+import com.example.taskmanager.Service.MyNotificationReceiver;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputLayout;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.messaging.FirebaseMessaging;
 
 
 import java.time.LocalDate;

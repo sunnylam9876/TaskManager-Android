@@ -78,7 +78,7 @@ public class ListFragment extends Fragment {
     String selectedPatient = "All";
 
     String selectedPatientId;
-
+    String selectedItemFromSavedPreference;
 //--------------------------------------------------------------------------------------------------------------------
     // Setup Category drop-down menu
     String[] categories = {"All", "Appointment", "Medicine", "Workout", "Others"};

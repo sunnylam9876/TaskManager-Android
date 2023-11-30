@@ -16,6 +16,7 @@ import android.os.PowerManager;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import com.example.taskmanager.LoginActivity;
 import com.example.taskmanager.MainActivity;
 import com.example.taskmanager.R;
 
@@ -46,7 +47,7 @@ public class MyNotificationReceiver extends BroadcastReceiver {
             }, 3000); // Adjust the time as needed, e.g., 3000 milliseconds = 3 seconds
         }
 
-        Intent i = new Intent(context, MainActivity.class); //NotificationDetails.class
+        Intent i = new Intent(context, LoginActivity.class); //NotificationDetails.class
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, i, PendingIntent.FLAG_IMMUTABLE);
 

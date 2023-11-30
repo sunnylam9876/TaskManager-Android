@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -53,6 +54,14 @@ public class LoginActivity extends AppCompatActivity {
 
         checkInternetConnection();
 
+        // Get a reference to the SharedPreferences
+        SharedPreferences sharedPreferences = getSharedPreferences("MyAppPreferences", Context.MODE_PRIVATE);
+
+        // Clear all data in the SharedPreferences
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.clear();
+        editor.commit(); // or editor.apply()
+
 
         auth = FirebaseAuth.getInstance();
 
@@ -70,6 +79,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String userEmail = etLoginEmail.getText().toString();
                 String pass = etLoginPassword.getText().toString();
+                tvLoginMsg.setText("");
 
                 if (!userEmail.isEmpty() && Patterns.EMAIL_ADDRESS.matcher(userEmail).matches()) {
                     if (!pass.isEmpty()) {
@@ -147,7 +157,7 @@ public class LoginActivity extends AppCompatActivity {
                             } else {
                                 // No user document found for the given UID
                                 // Handle the case where the user data is missing
-                                Toast.makeText(LoginActivity.this, "Error getting user information", Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, "Please create an account", Toast.LENGTH_LONG).show();
                             }
                         }
                     })

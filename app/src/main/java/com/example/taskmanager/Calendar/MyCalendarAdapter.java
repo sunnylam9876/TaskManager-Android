@@ -131,7 +131,9 @@ public MyCalendarAdapter() {
             holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.pink));
         } else {
             // Unhighlight the clicked cell
-            holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            //holder.cellDayText.setBackgroundColor(ContextCompat.getColor(context, R.color.white));
+            holder.cellDayText.setBackgroundColor(Color.TRANSPARENT);
+
             //highlight Today
             if (holder.cellDayText.getText().toString().equals(Integer.toString(today_day)) &&
                     dateClass.getYear() == today_year && dateClass.getMonth() == today_month) {

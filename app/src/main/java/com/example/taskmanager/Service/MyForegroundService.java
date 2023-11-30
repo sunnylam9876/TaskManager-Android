@@ -105,6 +105,8 @@ public class MyForegroundService extends Service {
             }
         }
 
+        //Toast.makeText(this, "Foreground service running", Toast.LENGTH_SHORT).show();
+
         return START_STICKY; // Service will be restarted if it's killed by the system
     }
 
@@ -145,14 +147,15 @@ public class MyForegroundService extends Service {
         DatabaseReference myRef;
         DatabaseReference myRef_doctor;
 
-        /*if (userRole.equals("Doctor")) {
+        if (userRole.equals("Doctor")) {
             myRef = realtime_db.getReference("doctor");
         } else {
             myRef = realtime_db.getReference(userId);
-        }*/
+        }
 
-        myRef = realtime_db.getReference(userId);
-        Log.d("realtimedb", userId);
+        //myRef = realtime_db.getReference(userId);
+
+        //Log.d("realtimedb", userId);
 
         // set realtime database event listener for patient, if any update from the doctor, it will notify the patient
         myRef.addValueEventListener(new ValueEventListener() {
@@ -164,19 +167,21 @@ public class MyForegroundService extends Service {
                     //.makeText(MyForegroundService.this, "Realtime database triggered", Toast.LENGTH_LONG).show();
                     //Log.d("realtimedb", "Realtime database onDataChange triggered");
 
-                    wakeUpScreen();     // wake up the screen to show notifications
-
-                    MsgClass newValue = snapshot.getValue(MsgClass.class);
-
-                    showFloatingNotification(newValue.getTitle(), newValue.getMsg());
-
                     // send a broadcast msg, the HomeFragment will update the calendar
                     // once it receive the intent
                     Intent intent = new Intent("LOAD_DATA_FROM_DB");
                     sendBroadcast(intent);
 
+                    //Toast.makeText(MyForegroundService.this, "Realtime DB listener running", Toast.LENGTH_SHORT).show();
+                    LoadDataInBackground();     // This will load data in background even if the app is killed
+
                     if (userRole.equals("Patient")) {
-                        LoadDataInBackground();     // This will load data in background even if the app is killed
+
+                        wakeUpScreen();     // wake up the screen to show notifications
+
+                        MsgClass newValue = snapshot.getValue(MsgClass.class);
+
+                        showFloatingNotification(newValue.getTitle(), newValue.getMsg());
                     }
                 }
             }

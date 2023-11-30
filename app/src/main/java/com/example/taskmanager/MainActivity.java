@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
             //}
         }
 
-        setContentView(R.layout.activity_main);   // disabled since we use view binding
+        setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottomNavigationView);
 
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements MyCalendarAdapter
     }
 
     @Override
-    public void onItemClick(String day) {
+    public void onItemClick(String day) {   // for calendar onClick event
         //Toast.makeText(this, "Selected Day: " + day + " " + monthFromDate(selectedDate) + " " + yearFromDate(selectedDate), Toast.LENGTH_SHORT).show();
     }
 

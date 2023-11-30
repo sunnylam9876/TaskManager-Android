@@ -11,7 +11,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
 import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -22,6 +24,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.SearchView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,9 +52,7 @@ public class ListFragment extends Fragment {
 
     boolean selectable = false;      // indicate whether the Patient drop-down menu is selectable or not
 
-    //set Task List
-
-    EditText etSearch;
+    SearchView searchView;
     AutoCompleteTextView tvPatientFilter, tvCategoryFilter;
     private RecyclerView rvList;
     private RecyclerView.LayoutManager taskListLayoutManager;
@@ -115,10 +116,11 @@ public class ListFragment extends Fragment {
         thisFragmentContext = requireContext();
         View view = inflater.inflate(R.layout.fragment_list, container, false);
 
-        etSearch = view.findViewById(R.id.etSearch);
         rvList = view.findViewById(R.id.rvList);
         tvPatientFilter = view.findViewById(R.id.tvHomePatientFilter);
         tvCategoryFilter = view.findViewById(R.id.tvCategoryFilter);
+
+        searchView = view.findViewById(R.id.searchView);
 
         taskList = new ArrayList<>();
         filteredTaskList = new ArrayList<>();
@@ -214,34 +216,35 @@ public class ListFragment extends Fragment {
 //--------------------------------------------------------------------------------------------------------------------
         LoadDataFromDB();
 
-        // Handle search bar function
-        etSearch.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        // Handle search function
+        // Use SearchView to search data
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    String userInput = etSearch.getText().toString();
-                    searchTask(userInput);
-                    setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
-                    //Toast.makeText(thisFragmentContext, userInput, Toast.LENGTH_LONG).show();
-                    return true;
-                }
+            public boolean onQueryTextSubmit(String query) {
                 return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                //String userInput = etSearch.getText().toString();
+                searchTask(newText);
+                setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
+                //Toast.makeText(thisFragmentContext, userInput, Toast.LENGTH_LONG).show();
+                return true;
             }
         });
 
         return view;
     }
+//--------------------------------------------------------------------------------------------------------------------
+
+
+
 
     private void LoadDataFromDB() {
-        // Load all data in the selected month for the logged-in user
+        // Load all data for the logged-in user
 
-        //int year = selectedDate.getYear();
-        //int month = selectedDate.getMonthValue();
-        //int day = selectedDate.getDayOfMonth();
-        //String patientId = "UTQYAjSOYmbFWBXryzHuRtvOcAF2";
         String patientId = userId;
-        //String status = "Pending";
-
 
         // Clear the lists first
         taskList.clear();
@@ -249,10 +252,6 @@ public class ListFragment extends Fragment {
         if (userRole.equals("Doctor")) {    //doctor can see all the data
             // need to create index in Firestore first, click the link in the error msg
             query = taskCollection
-                    //.whereEqualTo("year", year)
-                    //.whereEqualTo("month", month)
-                    //.whereEqualTo("day", day)
-                    //.whereEqualTo("patientId", patientId)
                     .whereEqualTo("status", "Pending")
                     .orderBy("year", Query.Direction.ASCENDING)
                     .orderBy("month", Query.Direction.ASCENDING)
@@ -264,21 +263,14 @@ public class ListFragment extends Fragment {
         } else {    // patient only view their own data
             // need to create index in Firestore first, click the link in the error msg
             query = taskCollection
-                    //.whereEqualTo("year", year)
-                    //.whereEqualTo("month", month)
-                    //.whereEqualTo("day", day)
                     .whereEqualTo("patientId", patientId)
                     .whereEqualTo("status", "Pending")
                     .orderBy("year", Query.Direction.ASCENDING)
                     .orderBy("month", Query.Direction.ASCENDING)
-                    .orderBy("day", Query.Direction.ASCENDING)      // need to create index in Firestore first, or click the link in the error msg
+                    .orderBy("day", Query.Direction.ASCENDING)
                     .orderBy("hour", Query.Direction.ASCENDING)
                     .orderBy("minute", Query.Direction.ASCENDING);
-            //.orderBy("day");
-            //.whereEqualTo("category", category);
         }
-
-
 
         // Execute the query to get the matching documents
         query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -292,7 +284,6 @@ public class ListFragment extends Fragment {
                         setTaskList(taskList);  // Load the filtered data to RecyclerView
                     }
 
-
                 } else {
                     // Display the error
                     Toast.makeText(thisFragmentContext, task.getException().toString(), Toast.LENGTH_LONG).show();
@@ -301,12 +292,10 @@ public class ListFragment extends Fragment {
             }
         });
 
-        // Feed the task list to RecyclerView
-
-
     }
 
 //--------------------------------------------------------------------------------------------------------------------
+    // Feed the task list to RecyclerView
     //set the content of Task List
     private void setTaskList(ArrayList<TaskClass> taskList) {
 
@@ -318,7 +307,6 @@ public class ListFragment extends Fragment {
     }
 
     private void filterTask(String patientName, String category) {
-        //ArrayList<TaskClass> filteredTaskList = new ArrayList<>();
 
         if (filteredTaskList != null)
             filteredTaskList.clear();

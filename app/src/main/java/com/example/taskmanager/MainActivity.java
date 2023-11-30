@@ -1,21 +1,14 @@
 package com.example.taskmanager;
 
-import static com.example.taskmanager.Utility.CalculateDate.monthFromDate;
-import static com.example.taskmanager.Utility.CalculateDate.yearFromDate;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.example.taskmanager.Calendar.MyCalendarAdapter;
 import com.example.taskmanager.Utility.FragmentUtility;
-import com.example.taskmanager.service.MyForegroundService;
+import com.example.taskmanager.Service.MyForegroundService;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity implements MyCalendarAdapter.OnItemClickListener{

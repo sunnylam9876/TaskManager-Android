@@ -1,9 +1,8 @@
-package com.example.taskmanager.service;
+package com.example.taskmanager.Service;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.RingtoneManager;

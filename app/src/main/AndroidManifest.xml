@@ -22,26 +22,22 @@
         android:theme="@style/Theme.TaskManager"
         tools:targetApi="31">
         <service
-            android:name=".service.MyForegroundService"
+            android:name=".Service.MyForegroundService"
             android:enabled="true"
             android:exported="true"></service>
-        <service
-            android:name=".service.MyBgServices"
-            android:enabled="true"
-            android:exported="true" />
 
         <activity
             android:name=".NotificationDetails"
             android:exported="false" />
         <!--
-     Set custom default icon. This is used when no icon is set for incoming notification messages.
-     See README(https://goo.gl/l4GJaQ) for more.
+             Set custom default icon. This is used when no icon is set for incoming notification messages.
+             See README(https://goo.gl/l4GJaQ) for more.
         -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/baseline_access_alarm_24" />
         <!--
- Set color used with incoming notification messages. This is used when no color is set for the incoming
+             Set color used with incoming notification messages. This is used when no color is set for the incoming
              notification message. See README(https://goo.gl/6BKBk7) for more.
         -->
         <meta-data
@@ -68,16 +64,8 @@
             android:name=".SignupActivity"
             android:exported="false" />
 
-        <service
-            android:name=".service.MyFirebaseMessagingService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
-
         <receiver
-            android:name=".service.MyNotificationReceiver"
+            android:name=".Service.MyNotificationReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />

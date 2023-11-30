@@ -158,7 +158,16 @@ public class AddItemFragment extends Fragment {
                 isUpdate = true;
         }
 
-        if (isUpdate == false) {    // Read only mode (i.e. Patient)
+        if (isUpdate) {
+            // disable Patient drop-down menu
+            tvSelectPatient.setFocusable(false);
+            tvSelectPatient.setFocusableInTouchMode(false);
+            tvSelectPatient.setInputType(InputType.TYPE_NULL);
+            tvSelectPatient.setOnClickListener(null);
+            tvSelectPatient.setOnTouchListener(null);
+        }
+
+        if (!isUpdate) {    // Read only mode (i.e. Patient)
             //if (userRole.equals("Patient")) {
             // disable the submit button
             //btnSubmit.setEnabled(false);
@@ -206,6 +215,9 @@ public class AddItemFragment extends Fragment {
                 btnSubmit.setText("Add");
                 selectedDate = bundle_fragment.getString("clickedDate");    // get user clicked date in HomeFragment
                 tvInputDate.setText(selectedDate);
+
+
+
                 String selectedPatient = bundle_fragment.getString("selectedPatient");  // get user selected Patient in HomeFragment
                 if (!selectedPatient.equals("All")) {
                     tvSelectPatient.setText(selectedPatient);
@@ -328,12 +340,19 @@ public class AddItemFragment extends Fragment {
                 @Override
                 public void onClick(View v) {
                     int hour, minute;
-                    if (isUpdate && !isNewTask) {
+                    if (isUpdate && !isNewTask) {   // if update, not new task
                         hour = taskDetail.getHour();
                         minute = taskDetail.getMinute();
-                    } else {
-                        hour = 20;
-                        minute = 0;
+                    } else {    // if a new task
+                        // Get the current time
+                        Calendar calendar = Calendar.getInstance();
+
+                        // Get the current hour and minute
+                        int currentHour = calendar.get(Calendar.HOUR_OF_DAY); // 24-hour format
+                        int currentMinute = calendar.get(Calendar.MINUTE);
+
+                        hour = currentHour;
+                        minute = currentMinute;
                     }
                     MaterialTimePicker timePicker = new MaterialTimePicker.Builder()
                             .setTimeFormat(TimeFormat.CLOCK_24H)

@@ -56,6 +56,8 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
+        context = getApplicationContext();
+
         etSignupName = findViewById(R.id.etSignupName);
         etSignupEmail = findViewById(R.id.etSignupEmail);
         etSignupPassword = findViewById(R.id.etSignupPassword);
@@ -146,7 +148,7 @@ public class SignupActivity extends AppCompatActivity {
                                                                     i.putExtras(bundle);
 
                                                                     //redirect to MainActivity
-                                                                    context.startActivity(i);
+                                                                    startActivity(i);
                                                                 }
                                                             }
                                                         });

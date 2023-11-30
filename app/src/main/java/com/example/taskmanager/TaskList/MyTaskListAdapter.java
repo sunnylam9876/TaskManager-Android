@@ -31,6 +31,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -45,13 +46,16 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
     private List<TaskClass> taskList;
 
     private String userRole;
+
+    private String selectedPatientId;
     private Context context;
 
     // constructor
-    public MyTaskListAdapter(List<TaskClass> taskList, String userRole, Context context) {
+    public MyTaskListAdapter(List<TaskClass> taskList, String userRole, String selectedPatientId, Context context) {
         this.taskList = taskList;
         this.context = context;
         this.userRole = userRole;
+        this.selectedPatientId = selectedPatientId;
     }
 
     //2 define view holder
@@ -113,13 +117,31 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         }
 
         if (status.equals("Pending")) {
-            // set the text to red if the task is overdue
+            /*// set the text to red if the task is overdue
             LocalDate currentDate = LocalDate.now();
             LocalDate taskDate = LocalDate.of(eachTask.getYear(), eachTask.getMonth(), eachTask.getDay());
 
             // compare the dates
             int comparison = currentDate.compareTo(taskDate);
             if (comparison > 0) {
+                holder.ctvComplete.setTextColor(Color.RED);
+                holder.tvTaskListDue.setTextColor(Color.RED);
+            }*/
+            // Get the current date and time
+            LocalDateTime currentDateTime = LocalDateTime.now();
+
+            // Create a LocalDateTime object for the task's date and time
+            LocalDateTime taskDateTime = LocalDateTime.of(
+                    eachTask.getYear(),
+                    eachTask.getMonth(),
+                    eachTask.getDay(),
+                    eachTask.getHour(),
+                    eachTask.getMinute()
+            );
+
+            // Compare the current date and time with the task's date and time
+            if (currentDateTime.isAfter(taskDateTime)) {
+                // The task's date and time is in the past
                 holder.ctvComplete.setTextColor(Color.RED);
                 holder.tvTaskListDue.setTextColor(Color.RED);
             }
@@ -150,8 +172,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
             public void onClick(View v) {
                 boolean isChecked = holder.ctvComplete.isChecked();
                 String statusString;
-                if (isChecked) {
-                    // if the check box is unchecked by user
+                if (isChecked) {        // if the check box is unchecked by user
                     // set the checkbox be unchecked
                     holder.ctvComplete.setChecked(false);
                     statusString = "Pending";
@@ -159,8 +180,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     holder.ctvComplete.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
 
-
-                    completionNotification();
+                    //completionNotification();
 
                     if (status.equals("Pending")) {
                         // set the text to red if the task is overdue
@@ -175,8 +195,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                         }
                     }
                     //Toast.makeText(context, "isChecked", Toast.LENGTH_LONG).show();
-                } else {
-                    // if the check box is checked by user
+                } else {        // if the check box is checked by user
                     // mark the checkbox be checked
                     holder.ctvComplete.setChecked(true);
                     statusString = "Completed";
@@ -185,16 +204,16 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                     holder.tvTaskListDue.setPaintFlags(holder.ctvComplete.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
                     holder.ctvComplete.setTextColor(Color.BLACK);
                     holder.tvTaskListDue.setTextColor(Color.BLACK);
-                    completionNotification();
+                    //completionNotification();
                     //Toast.makeText(context, "not isChecked", Toast.LENGTH_LONG).show();
                 }
+
                 int adapterPosition = holder.getAdapterPosition();
                 if (adapterPosition != RecyclerView.NO_POSITION) {
-                    TaskClass taskToDelete = taskList.get(adapterPosition);
+                    TaskClass taskToUpdate = taskList.get(adapterPosition);
 
-                    // Ge the document id of the Firestore document to delete
-                    String documentId = taskToDelete.getId();
-
+                    // Get the document id of the Firestore document to update
+                    String documentId = taskToUpdate.getId();
 
                     Map<String, Object> updatedData = new HashMap<>();
                     updatedData.put("status", statusString);
@@ -205,7 +224,9 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void unused) {
-                                    Toast.makeText(context, "Activity completed", Toast.LENGTH_LONG).show();
+                                    Toast.makeText(context, "Activity updated", Toast.LENGTH_LONG).show();
+                                    String msg = holder.ctvComplete.getText().toString() + " on " + holder.tvTaskListDue.getText().toString();
+                                    completionNotification("Activity updated", msg, documentId, selectedPatientId);
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
@@ -253,13 +274,21 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
 
     }
 
-    public void completionNotification() {       // update realtime database 'doctor' channel
+    public void completionNotification(String title, String msg, String documentId, String patientId) {       // update realtime database 'doctor' channel
         // connection to Firebase Realtime database
         FirebaseDatabase realtime_db = FirebaseDatabase.getInstance();
         long timeStamp = System.currentTimeMillis(); // Use a timestamp as a unique ID
-        //MsgClass realtimeMsg = new MsgClass(title, msg, documentId, timeStamp);
-        DatabaseReference myRef = realtime_db.getReference("doctor");
-        myRef.setValue(timeStamp);
+        MsgClass realtimeMsg = new MsgClass(title, msg, documentId, timeStamp);
+        if (userRole.equals("Patient")) {
+            DatabaseReference myRef = realtime_db.getReference("doctor");
+            myRef.setValue(realtimeMsg);
+        }
+        if (userRole.equals("Doctor")) {
+            DatabaseReference myRef = realtime_db.getReference(patientId);
+            myRef.setValue(realtimeMsg);
+        }
+
+
     }
 
     @Override

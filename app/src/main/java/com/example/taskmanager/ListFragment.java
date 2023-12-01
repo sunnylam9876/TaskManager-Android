@@ -42,6 +42,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
 public class ListFragment extends Fragment {
@@ -78,6 +80,8 @@ public class ListFragment extends Fragment {
     String selectedPatient = "All";
 
     String selectedPatientId;
+
+    Map<String, String> patientMap = new HashMap<>();
 
 //--------------------------------------------------------------------------------------------------------------------
     // Setup Category drop-down menu
@@ -177,6 +181,11 @@ public class ListFragment extends Fragment {
                                     patientList.add(user);
                                     patientNameList.add(user.getUserName());
 
+                                    // save patient name and the associated patientId to hash map
+                                    for (int i = 0; i <= patientList.size() - 1; i++) {
+                                        patientMap.put(patientList.get(i).getUserName(), patientList.get(i).getUserId());
+                                    }
+
                                     // Add Patient to the Patient drop-down menu
                                     // Use the new dropdown_item_layout.xml for the adapter
                                     patientAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);
@@ -184,25 +193,20 @@ public class ListFragment extends Fragment {
                                     // Specify the layout resource for dropdown items
                                     patientAdapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line);
                                     tvPatientFilter.setAdapter(patientAdapter);
-                                    //tvPatientFilter.setAdapter(patientAdapter);
-                                    //tvPatientFilter.setText(patientAdapter.getItem(0), false);
-                                    /*if (selectedItemFromSavedPreference != null) {
-                                        tvPatientFilter.setText(selectedItemFromSavedPreference, false);
-                                    }*/
 
-                                    if (selectedPatient != null || !selectedPatient.equals("")) {
-                                        tvPatientFilter.setText(selectedPatient, false);
-                                    } else
-                                        tvPatientFilter.setText(patientAdapter.getItem(0), false);
-
-                                    //LoadDataFromDB();
+                                    if (selectedPatient != null) {
+                                        if (!selectedPatient.equals(""))    // if empty
+                                            tvPatientFilter.setText(selectedPatient, false);
+                                    }
 
                                     tvPatientFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                                             selectedPatient = parent.getItemAtPosition(position).toString();
+                                            selectedPatientId = patientMap.get(tvPatientFilter.getText().toString());
+                                            LoadDataFromDB();
                                             //Toast.makeText(thisFragmentContext, selectedPatient + " : " + selectedCategory, Toast.LENGTH_LONG).show();
-                                            filterTask(selectedPatient, selectedCategory);
+                                            filterTask(searchView.getQuery().toString());
                                             setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
                                         }
                                     });
@@ -228,7 +232,7 @@ public class ListFragment extends Fragment {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 selectedCategory =  parent.getItemAtPosition(position).toString();
                 //Toast.makeText(thisFragmentContext, selectedCategory, Toast.LENGTH_SHORT).show();
-                filterTask(selectedPatient, selectedCategory);
+                filterTask(searchView.getQuery().toString());
                 setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
             }
         });
@@ -247,7 +251,8 @@ public class ListFragment extends Fragment {
             @Override
             public boolean onQueryTextChange(String newText) {
                 //String userInput = etSearch.getText().toString();
-                searchTask(newText);
+                //searchTask(newText);
+                filterTask(newText);
                 setTaskList(filteredTaskList);  // Load the filtered data to RecyclerView
                 //Toast.makeText(thisFragmentContext, userInput, Toast.LENGTH_LONG).show();
                 return true;
@@ -270,6 +275,7 @@ public class ListFragment extends Fragment {
             // need to create index in Firestore first, click the link in the error msg
             query = taskCollection
                     .whereEqualTo("status", "Pending")
+                    .whereEqualTo("patientId", selectedPatientId)
                     .orderBy("year", Query.Direction.ASCENDING)
                     .orderBy("month", Query.Direction.ASCENDING)
                     .orderBy("day", Query.Direction.ASCENDING)
@@ -323,39 +329,38 @@ public class ListFragment extends Fragment {
         taskListAdapter.notifyDataSetChanged();
     }
 
-    private void filterTask(String patientName, String category) {
+    private void filterTask(String searchString) {
 
         if (filteredTaskList != null)
             filteredTaskList.clear();
 
-        if (selectedPatient.equals("All")) {
-            if (selectedCategory.equals("All")) {  // Patient = All and Category = All
+        searchString = searchString.toLowerCase();
+
+            if (selectedCategory.equals("All")) {   // Category = All
                 for (TaskClass eachTask : taskList) {
-                    filteredTaskList.add(eachTask);
+                    String taskTitle = eachTask.getTaskTitle().toLowerCase();
+                    if (searchString.equals("")) {  // if search string is empty
+                        filteredTaskList.add(eachTask);
+                    } else {
+                        if (taskTitle.contains((searchString))) {   // if search string is not empty
+                            filteredTaskList.add(eachTask);
+                        }
+                    }
                 }
-            } else {    // Patient = All and Category = not All
+            } else {                                // Category = not All
                 for (TaskClass eachTask : taskList) {
+                    String taskTitle = eachTask.getTaskTitle().toLowerCase();
                     if (eachTask.getCategory().equals(selectedCategory)) {
-                        filteredTaskList.add(eachTask);
+                        if (searchString.equals("")) {      // if search string is empty
+                            filteredTaskList.add(eachTask);
+                        } else {
+                            if (taskTitle.contains((searchString))) {  // if search string is not empty
+                                filteredTaskList.add(eachTask);
+                            }
+                        }
                     }
                 }
             }
-        }
-        else {
-            if (selectedCategory.equals("All")) {   // Patient = not All and Category = All
-                for (TaskClass eachTask : taskList) {
-                    if (eachTask.getPatientName().equals(selectedPatient)) {
-                        filteredTaskList.add(eachTask);
-                    }
-                }
-            } else {    // Patient = not All and Category = not All
-                for (TaskClass eachTask : taskList) {
-                    if (eachTask.getPatientName().equals(selectedPatient) && eachTask.getCategory().equals(selectedCategory)) {
-                        filteredTaskList.add(eachTask);
-                    }
-                }
-            }
-        }
     }
 
     private void searchTask(String searchString) {
@@ -368,5 +373,4 @@ public class ListFragment extends Fragment {
             }
         }
     }
-
 }

@@ -176,6 +176,7 @@ public class ListFragment extends Fragment {
                                     UserClass user = document.toObject(UserClass.class);
                                     patientList.add(user);
                                     patientNameList.add(user.getUserName());
+
                                     // Add Patient to the Patient drop-down menu
                                     // Use the new dropdown_item_layout.xml for the adapter
                                     patientAdapter = new ArrayAdapter<String>(thisFragmentContext, R.layout.dropdown_item_layout, patientNameList);

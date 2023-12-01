@@ -150,18 +150,22 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         switch(eachTask.getCategory()) {
             case "Appointment":
                 holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_appointment_24));
+                holder.ivCategory.setBackground(context.getDrawable(R.drawable.background_task_color_appointment));
                 break;
 
             case "Medicine":
                 holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_medicine_24));
+                holder.ivCategory.setBackground(context.getDrawable(R.drawable.background_task_color_medicine));
                 break;
 
             case "Workout":
                 holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_workout_24));
+                holder.ivCategory.setBackground(context.getDrawable(R.drawable.background_task_color_workout));
                 break;
 
             case "Others":
                 holder.ivCategory.setImageDrawable(context.getDrawable(R.drawable.baseline_circle_others_24));
+                holder.ivCategory.setBackground(context.getDrawable(R.drawable.background_task_color_others));
                 break;
 
         }

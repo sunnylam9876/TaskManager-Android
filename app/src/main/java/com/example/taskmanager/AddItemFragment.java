@@ -264,7 +264,6 @@ public class AddItemFragment extends Fragment {
                                     patientNameList.add(user.getUserName());
 
                                     // save patient name and the associated patientId to hash map
-
                                     for (int i = 0; i <= patientList.size() - 1; i++) {
                                         patientMap.put(patientList.get(i).getUserName(), patientList.get(i).getUserId());
                                     }

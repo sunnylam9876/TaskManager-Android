@@ -27,10 +27,11 @@
             <ImageView
                 android:id="@+id/ivCategory"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:layout_gravity="center_horizontal|center_vertical"
                 android:layout_marginLeft="5dp"
                 android:layout_weight="0"
+                android:background="@drawable/background_task_color_appointment"
                 app:srcCompat="@drawable/baseline_circle_appointment_24" />
 
             <LinearLayout

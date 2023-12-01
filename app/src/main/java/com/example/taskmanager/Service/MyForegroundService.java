@@ -237,7 +237,7 @@ public class MyForegroundService extends Service {
                                 // Create an AlarmClockInfo object
                                 AlarmManager.AlarmClockInfo alarmClockInfo = new AlarmManager.AlarmClockInfo(calendar.getTimeInMillis(), pendingIntent);
 
-                                // Set the alarm using setAlarmClock()
+                                // Set alarm using setAlarmClock()
                                 alarmManager.setAlarmClock(alarmClockInfo, pendingIntent);
 
                                 //update the field in database

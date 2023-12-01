@@ -92,7 +92,7 @@ public class MyForegroundService extends Service {
 
             if (!isServiceStarted) {
                 // Create a notification for the foreground service
-                Notification notification = buildNotification(this, "Caregiver App is running", "");
+                Notification notification = buildNotification(this, "CareConnect App is running", "");
 
                 // Start the service in the foreground with the notification
                 startForeground(SERVICE_NOTIFICATION_ID, notification);

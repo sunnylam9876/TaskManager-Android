@@ -284,19 +284,7 @@ public class HomeFragment extends Fragment implements MyCalendarAdapter.OnItemCl
                                     if (selectedPatient != null) {
                                         if (!selectedPatient.equals(""))    // if empty
                                             tvHomePatientFilter.setText(selectedPatient, false);
-                                        //else    // if not empty
-                                            //tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
-                                    } //else  // if null
-                                        //tvHomePatientFilter.setText(patientAdapter.getItem(0), false);
-
-
-/*                                    if (selectedPatient != null || !selectedPatient.equals("")) {
-                                        tvHomePatientFilter.setText(selectedPatient, false);
-                                    } else
-                                        tvHomePatientFilter.setText(patientAdapter.getItem(0), false);*/
-
-                                    //LoadDataFromDB();
-
+                                    }
                                     tvHomePatientFilter.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                         @Override
                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {

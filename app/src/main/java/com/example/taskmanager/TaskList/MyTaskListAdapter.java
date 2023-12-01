@@ -63,7 +63,6 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         public CheckedTextView ctvComplete;
         public TextView tvTaskListDue;
         public ImageView ivCategory;
-
         public ImageButton btnViewMore;
 
         // constructor
@@ -97,11 +96,6 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         TaskClass eachTask = taskList.get(position);
         holder.ctvComplete.setText(eachTask.getTaskTitle());
 
-/*        if (userRole.equals("Doctor")) {
-            //holder.ctvComplete.setCheckMarkDrawable(android.R.color.transparent); // Hide the checkbox
-            holder.ctvComplete.setEnabled(false);
-        }*/
-
         String hourString = String.format(Locale.getDefault(), "%02d", eachTask.getHour());
         String minuteString = String.format(Locale.getDefault(), "%02d", eachTask.getMinute());
 
@@ -117,17 +111,7 @@ public class MyTaskListAdapter extends RecyclerView.Adapter<MyTaskListAdapter.My
         }
 
         if (status.equals("Pending")) {
-            /*// set the text to red if the task is overdue
-            LocalDate currentDate = LocalDate.now();
-            LocalDate taskDate = LocalDate.of(eachTask.getYear(), eachTask.getMonth(), eachTask.getDay());
 
-            // compare the dates
-            int comparison = currentDate.compareTo(taskDate);
-            if (comparison > 0) {
-                holder.ctvComplete.setTextColor(Color.RED);
-                holder.tvTaskListDue.setTextColor(Color.RED);
-            }*/
-            // Get the current date and time
             LocalDateTime currentDateTime = LocalDateTime.now();
 
             // Create a LocalDateTime object for the task's date and time

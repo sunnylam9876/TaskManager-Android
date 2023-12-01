@@ -18,8 +18,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
-            android:layout_marginTop="180dp"
-            android:text="Caregiver"
+            android:layout_marginTop="220dp"
+            android:text="CareConnect"
             android:textColor="@color/purple"
             android:textSize="40sp"
             android:textStyle="bold" />
